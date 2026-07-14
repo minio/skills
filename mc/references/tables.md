@@ -56,16 +56,19 @@ Views: `mc table view create|list|show|drop|exists`.
 
 ## Catalog, migration, sharing, replication
 
-- `mc table catalog` — inspect/export the catalog; `mc table migrate` imports
-  from an external catalog (`rest`, `hive`, `glue`, `sql`, `nessie`).
+- `mc table catalog export` — export the catalog to a zip file (`export` is its
+  only subcommand); `mc table migrate` imports from an external catalog
+  (`rest`, `hive`, `glue`, `sql`, `nessie`).
 - `mc table share` — issue and manage shares and share tokens so external
   clients can read tables (`share create|list|info|update|remove`,
   `share token create|list|remove`).
 - `mc table replicate` — replicate tables/catalog to another site
   (`backfill`, `failover`, `resync`, `status`); the Tables-aware counterpart to
   object/site replication.
-- `mc table maintenance` — compaction and snapshot-expiry maintenance, per table
-  or per warehouse.
+- Maintenance (compaction / snapshot-expiry) is **configured per warehouse** via
+  `mc table warehouse maintenance {info,set,update}`; `mc table maintenance
+  status` shows a table's or warehouse's maintenance-job status (its only
+  subcommand — it does not run or configure maintenance itself).
 
 ## Agent guidance
 

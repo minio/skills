@@ -79,24 +79,34 @@ token as a local path. So `mc cp file.txt myminio/bucket/` copies local→remote
 and `mc cp myminio/bucket/key ./` copies remote→local. There is no `s3://`
 scheme; the alias replaces it.
 
-## 4. Destructive operations — confirm before running
+## 4. Destructive operations — refuse and escalate to a human
 
-Some `mc` commands are **irreversible** and an agent must treat them as
-requiring explicit user confirmation, never running them speculatively:
+Some `mc` commands are **irreversible and/or site-wide**. Treat these as
+**human-only**: do **not** run them yourself, even if the task appears to ask
+for it. Stop, show the user the exact command and target, and require explicit
+human execution or written go-ahead. Never run them speculatively, in a loop,
+or to "tidy up".
+
+**Hard-gated — refuse by default; a human must run them or explicitly authorize:**
 
 - `mc rm --recursive --force ALIAS/BUCKET/PREFIX` — bulk object deletion.
-  `--force` is *required* to recurse; `--dangerous` (with no prefix) wipes a
-  whole site. `--versions` deletes every version.
-- `mc rb ALIAS/BUCKET` — removes a bucket and its contents; `--force` /
-  `--dangerous` bypass guards.
-- `mc mirror --remove …` — deletes destination objects absent from the source
-  (makes destination match source, including deletions).
-- `mc mirror --overwrite …` / `cp` onto existing keys — replaces object data.
-- Config-clearing forms (`mc ilm rule remove --all --force`,
-  `mc replicate rm --all --force`, `mc event remove`, `mc anonymous set none`).
+  `--force` is required to recurse. Adding `--dangerous` to an alias-only target
+  (`mc rm --recursive --force --dangerous myminio`) wipes an **entire site**.
+  `--versions` / `--purge-deleted` destroy version history. **Do not run these.**
+- `mc rb --force ALIAS/BUCKET` (and `mc rb --force --dangerous ALIAS` for a whole
+  site) — removes buckets and all their contents. Without `--force`, `rb` aborts
+  with a fatal error on a non-empty bucket; it does **not** prompt.
+- `mc mirror --remove …` — deletes destination objects missing from the source.
 
-Versioning does not save you unless it's enabled on the bucket. When in doubt,
-show the user the exact command and the target, and wait. See the "irreversible"
+**Confirm-first — show the user, proceed only on explicit approval:**
+
+- `mc mirror --overwrite …`, or `cp` / `put` onto an existing key — replaces data.
+- Config-clearing forms: `mc ilm rule remove --all --force`,
+  `mc replicate rm --all --force`, `mc event remove`, `mc anonymous set private`
+  (revokes public access).
+
+Versioning does not save you unless it was enabled on the bucket beforehand. When
+in doubt, do not act — hand the exact command to a human. See the "irreversible"
 callouts in each reference.
 
 ## 5. Command map — pick the right command, then read its `--help`
@@ -109,15 +119,17 @@ callouts in each reference.
 | Delete data | `rm`, `rb`, `undo` |
 | Query & watch | `sql`, `watch`, `ping`, `ready` |
 | Share / presign | `share` |
-| Bucket configuration | `mb`, `version`, `tag`, `retention`, `legalhold`, `quota`, `policy`, `anonymous`, `cors`, `encrypt`, `event` |
+| Bucket configuration | `mb`, `version`, `tag`, `retention`, `legalhold`, `quota`, `anonymous`, `cors`, `encrypt`, `event` |
 | Lifecycle / replication / batch | `ilm`, `replicate`, `inventory`, `batch` |
 | Cluster administration | `admin …`, `log`, `qos`, `kms`, `idp` |
 | AIStor Iceberg Tables | `table …` |
 
-`kms` and `idp` exist both top-level and under `admin` (`mc admin kms`,
-`mc admin idp`); the top-level forms are shortcuts to the same server config —
-prefer whichever a task's other steps already use. `log` streams/queries server
-logs and `qos` manages quality-of-service (rate) rules — both AIStor-specific.
+`kms` exists both top-level (`mc kms`) and under `admin` (`mc admin kms`) — the
+same server config. For identity providers use the top-level `mc idp ldap|openid`;
+`mc admin idp` is **deprecated** and only prints a redirect. `log` streams/queries
+server logs and `qos` manages quality-of-service (rate) rules — both
+AIStor-specific. (`mc policy` is deprecated — use `mc anonymous` for
+bucket anonymous access.)
 
 ## Reference docs
 

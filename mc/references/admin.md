@@ -1,8 +1,9 @@
 # Cluster administration — `mc admin`
 
-`mc admin` is the control plane for a MinIO/AIStor **server** — not the S3 data
-plane. These commands use the admin API and only work against MinIO/AIStor
-(never AWS S3). The alias must hold **admin-level** credentials. Run
+`mc admin` is the control plane for a **MinIO AIStor** server — not the S3 data
+plane. These commands use the AIStor admin API and only work against a MinIO
+AIStor server (never AWS S3, and not the general S3 data plane). The alias must
+hold **admin-level** credentials. Run
 `mc admin --help` and `mc admin <group> --help` for the exact, version-matched
 subcommands and flags; the groups below are the map.
 
@@ -16,7 +17,7 @@ subcommands and flags; the groups below are the map.
 | `mc admin scanner ALIAS` | Object-scanner status/metrics. |
 | `mc admin prometheus generate ALIAS` | Emit a Prometheus scrape config for the cluster's metrics endpoints. |
 | `mc admin cluster info \| iam \| bucket` | Inspect cluster; export/import IAM and bucket metadata for backup/migration. |
-| `mc admin profile` / `mc admin inspect` | Capture pprof profiles / inspect on-disk files for support cases (usually paired with SUBNET). |
+| `mc admin profile` / `mc support inspect` | Capture pprof profiles / inspect on-disk files for support cases. (`mc admin inspect` is deprecated — use `mc support inspect`.) |
 
 ## Identity & access
 
@@ -26,7 +27,7 @@ subcommands and flags; the groups below are the map.
 | `mc admin group` | Manage groups and membership. |
 | `mc admin policy` | Create/attach/detach **IAM** policies (JSON). Distinct from `mc anonymous`, which is public-bucket access. |
 | `mc admin accesskey` | Service accounts / access keys for a user (create, list, edit, remove). |
-| `mc admin idp {ldap,openid} …` | Configure external identity providers. |
+| `mc idp {ldap,openid} …` | Configure external identity providers. (Top-level; `mc admin idp` is deprecated and only prints a redirect.) |
 
 ## Configuration
 
@@ -40,8 +41,9 @@ mc admin config export ALIAS > cfg.txt    # back up before changing
 mc admin service restart ALIAS            # many config changes need a restart to apply
 ```
 
-`mc admin service restart|unfreeze` bounces the cluster — disruptive; confirm
-with the user. `mc admin service` also stops services.
+`mc admin service` has exactly two subcommands: `restart` (bounces the cluster —
+disruptive) and `unfreeze` (resumes S3 API calls after a freeze). There is no
+`stop`. `restart` is disruptive — confirm with the user before running it.
 
 ## Healing, capacity & topology (operational — confirm)
 
@@ -64,7 +66,9 @@ with the user. `mc admin service` also stops services.
 
 ## SUBNET & support
 
-`mc admin subnet` and the top-level `mc support` / `mc license` register the
-cluster with MinIO SUBNET, run health checks, and upload diagnostics for
-commercial support. These transmit cluster data to MinIO — get user consent
+`mc license register` registers the cluster with MinIO SUBNET, and `mc support`
+(`diag`, `perf`, `inspect`, `profile`, `callhome`, `top`, …) runs health checks
+and uploads diagnostics for commercial support. (`mc admin subnet` is
+deprecated — its register/health functions moved to `mc license` / `mc support`.)
+These transmit cluster data to MinIO — get user consent
 before running.

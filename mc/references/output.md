@@ -2,9 +2,11 @@
 
 ## `--json` is JSON Lines (NDJSON)
 
-`--json` (global; also `MC_JSON=on`) makes `mc` print **one JSON object per
-line**, not a single JSON document. This is the single most important fact for
-parsing `mc`:
+`--json` (global; also `MC_JSON=true`) makes `mc` print **one JSON object per
+line**, not a single JSON document. Boolean env vars must be a Go
+`strconv.ParseBool` value — `true`/`1` (or `false`/`0`); `MC_JSON=on` is **not**
+accepted and makes every `mc` command error out. This is the single most
+important fact for parsing `mc`:
 
 ```sh
 mc ls --json myminio/mybucket | jq -c '.'          # per-record, streaming
@@ -54,9 +56,10 @@ Note streaming commands: `mc cp`/`mirror` return non-zero if any item failed.
   auto-answer.
 - `mc alias set` with keys omitted prompts on stdin; provide keys via args (they
   hit shell history) or pipe them in for unattended runs.
-- `--quiet` (`-q`, or `MC_QUIET=on`) removes progress bars and spinners — use it
-  in logs/CI so output is deterministic. `--no-color` / `MC_NO_COLOR=on` strips
-  ANSI. `mc` auto-disables color when stdout is not a TTY.
+- `--quiet` (`-q`, or `MC_QUIET=true`) removes progress bars and spinners — use it
+  in logs/CI so output is deterministic. `--no-color` / `MC_NO_COLOR=true` strips
+  ANSI. `mc` auto-disables color when stdout is not a TTY. (As with `MC_JSON`,
+  these env vars take `true`/`1`, not `on`.)
 
 ## Useful shapes
 

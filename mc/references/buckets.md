@@ -10,10 +10,12 @@ mc mb myminio/mybucket [--region us-east-1] [--with-versioning]   # make bucket
 mc rb myminio/mybucket                                           # remove bucket
 ```
 
-`mc rb` **deletes the bucket and everything in it — irreversible.** It prompts
-by default; `--force` removes a non-empty bucket unattended, `--purge` clears
-even undeletable content, and `--dangerous` targets the whole site. Confirm with
-the user before running any of these.
+`mc rb` **deletes the bucket and everything in it — irreversible.** On a
+non-empty bucket it does **not** prompt; without `--force` it aborts with a
+fatal error. `--force` removes a non-empty bucket; `--force --dangerous` together
+target a whole site (`mc rb --force --dangerous myminio`). This is a hard-gated,
+human-only operation — do not run it yourself; hand the exact command to a human
+(see SKILL.md §4).
 
 ## Versioning — `mc version`
 
@@ -52,13 +54,15 @@ Manages the bucket's anonymous access policy:
 
 ```sh
 mc anonymous set download myminio/mybucket        # public read
-mc anonymous set none     myminio/mybucket        # revoke public access
+mc anonymous set private  myminio/mybucket        # revoke public access
 mc anonymous get          myminio/mybucket
 mc anonymous set-json FILE myminio/mybucket        # full custom policy
 ```
 
-Permissions: `none`, `download`, `upload`, `public`. `mc policy` is the older
-name for the same feature. This controls *anonymous* access only — IAM
+Allowed policies: `private`, `public`, `download`, `upload` (`private` revokes
+public access; `none` is an accepted legacy alias for `private`). `mc policy` is
+the **deprecated** older name — use `mc anonymous`. This controls *anonymous*
+access only — IAM
 user/policy management is `mc admin policy` (see `references/admin.md`).
 
 ## Quota — `mc quota`

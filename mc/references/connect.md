@@ -79,9 +79,10 @@ user's real config.
 `mc` works against AWS S3 and other S3-compatible stores, not just MinIO.
 Choose bucket addressing with `--path`:
 
-- `--path off` → virtual-hosted / DNS-style (`bucket.host`) — required for AWS
-  S3 and most managed providers.
-- `--path on` → path-style (`host/bucket`) — typical for MinIO and localhost.
-- `--path auto` (default) → let `mc` decide.
+- `--path auto` (default) → let `mc` decide; resolves correctly for AWS S3 and
+  most managed providers, so you rarely need to set this at all.
+- `--path off` → force virtual-hosted / DNS-style (`bucket.host`).
+- `--path on` → force path-style (`host/bucket`) — typical for MinIO AIStor and
+  localhost.
 
 `mc admin` commands are MinIO/AIStor-specific and will not work against AWS S3.

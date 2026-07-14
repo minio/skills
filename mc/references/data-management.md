@@ -12,7 +12,7 @@ Subcommands: `rule` (the rules), `tier` (remote tier targets — see below), and
 
 ```sh
 mc ilm rule add  myminio/mybucket --expire-days 90
-mc ilm rule add  myminio/mybucket --transition-days 30 --storage-class WARM-TIER
+mc ilm rule add  myminio/mybucket --transition-days 30 --transition-tier WARM-TIER
 mc ilm rule ls   myminio/mybucket
 mc ilm rule ls   myminio/mybucket --json          # inspect rule IDs
 mc ilm rule rm   myminio/mybucket --id <RULE_ID>
@@ -42,10 +42,11 @@ mc replicate status myminio/mybucket           # health + metrics
 mc replicate backlog myminio/mybucket          # what's pending
 mc replicate export myminio/mybucket > repl.json
 mc replicate rm     myminio/mybucket --all --force   # removes ALL rules — irreversible config change
-mc replicate reset  start myminio/mybucket     # re-replicate existing objects
+mc replicate resync start myminio/mybucket     # re-replicate existing objects
 ```
 
-`mc replicate resync`/`reset` re-drives replication of already-present objects —
+`mc replicate resync` (subcommands `start`/`status`/`cancel`) re-drives
+replication of already-present objects —
 expensive; understand the data volume first. For whole-cluster (all buckets,
 IAM, config) replication, use **site replication** under
 `mc admin replicate` (`references/admin.md`), not this command.

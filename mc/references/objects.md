@@ -12,7 +12,7 @@ wrong.
 | `mc ls [--recursive] [--versions] TARGET` | List objects/buckets. Non-recursive by default; `--recursive`/`-r` walks the prefix. |
 | `mc stat TARGET` | Full metadata for an object or bucket (size, etag, user metadata, tags, encryption, retention). |
 | `mc head [-n N] TARGET` | First N lines of an object (like `head`). |
-| `mc tree [-f] [-r] TARGET` | Prefixes as a tree. |
+| `mc tree [-f] [-d DEPTH] TARGET` | Prefixes as a tree (recurses by default; `-d`/`--depth` limits depth, `-f`/`--files` shows objects). |
 | `mc du [--depth N] TARGET` | Disk usage per prefix. |
 | `mc find TARGET [--name … --older-than … --larger …]` | Match objects by name/size/age/metadata. Listing matches is read-only. |
 | `mc diff FIRST SECOND` | Compare two trees (local or remote); reports what differs. Read-only — it never changes anything. |
@@ -29,7 +29,7 @@ never build the executed command from untrusted object names/keys.
 | `mc cat TARGET` | Stream an object to stdout. |
 | `mc pipe TARGET` | The inverse: stream stdin into an object (`… \| mc pipe myminio/bkt/key`). |
 | `mc sql --query "…" TARGET` | S3 Select over CSV/JSON/Parquet objects. |
-| `mc od if=SRC of=DST …` | Transfer with explicit multipart part sizes (`parts=`, `part-size=`); useful for benchmarking and tuned uploads. |
+| `mc od if=SRC of=DST …` | Transfer with explicit multipart sizing: `size=` (size of each part, e.g. `size=40MiB`) and `parts=` (number of parts); useful for benchmarking and tuned uploads. |
 
 ## Move data
 
@@ -47,7 +47,8 @@ never build the executed command from untrusted object names/keys.
 - `--remove` — delete destination objects that no longer exist in the source, so
   the destination becomes an exact mirror. **Deletes at the destination.**
 - `--watch` — keep running and mirror changes continuously.
-- `--force` — proceed past guards mirror would otherwise stop on.
+- (`--force` is a hidden, deprecated alias for `--overwrite` — don't use it; use
+  `--overwrite` / `--remove` explicitly.)
 
 Without `--overwrite`/`--remove`, `mirror` only *adds* missing objects — the
 safe default.
