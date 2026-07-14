@@ -13,9 +13,12 @@ mount | grep -E '^aimem on '       # same, portable fallback
 These locate the mount only — they do not expose the bucket, region, or
 endpoint (the filesystem source is always `aimem`, not the bucket name). The
 mount point is the root of the configured prefix, not necessarily the bucket
-itself: `ls <mount-root>` lists the top-level objects under that prefix. Every
-persistent file you read or write under the mount maps to an object on the
-backing MinIO AIStor bucket.
+itself: `ls <mount-root>` lists the top-level objects under that prefix, plus
+the synthetic `.aimem/` namespace (e.g. `.aimem/annot/` for object
+annotations). Every ordinary persistent file you read or write under the mount
+maps to an object on the backing MinIO AIStor bucket; entries under `.aimem/`
+are agent-native surfaces — object annotations are stored as native AIStor
+object metadata, not as object bytes — and are not ordinary objects.
 
 ## How to find things
 

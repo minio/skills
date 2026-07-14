@@ -12,9 +12,9 @@ metadata:
 
 You are (or may be) operating inside an **AIMem** mount: a FUSE filesystem
 that backs every read and write to a remote MinIO AIStor bucket. A write is
-durable and survives sandbox restart only once the file is closed and
-uploaded — see `references/workspace.md` for what is still at risk before
-that. Files other agents wrote to the same bucket are visible here too.
+durable and survives sandbox restart once `fsync()` or `close()` completes its
+upload — see `references/workspace.md` for what is still at risk before that.
+Files other agents wrote to the same bucket are visible here too.
 
 ## Find your mount
 
