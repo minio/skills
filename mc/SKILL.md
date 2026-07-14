@@ -33,17 +33,22 @@ mc alias list                # what's configured (redacts secret keys)
 mc alias list --json         # same, machine-readable
 ```
 
-Two ways to provide an alias. Prefer the environment form for agents — it
-persists nothing to disk and never mutates the user's config:
+Two ways to provide an alias. Prefer the environment form for agents — it keeps
+credentials out of `mc`'s config file and doesn't mutate the user's config:
 
 ```sh
-# Ephemeral, per-process — the agent's default. Alias name is the suffix.
-export MC_HOST_myminio='https://ACCESS_KEY:SECRET_KEY@play.min.io'
+# Per-process — the agent's default. Alias name is the MC_HOST_ suffix.
+# Inject the value from a secret manager / CI secret rather than a literal.
+export MC_HOST_myminio="https://${KEY}:${SECRET}@play.min.io"
 mc ls myminio/                             # "myminio" now resolves
 
 # Persisted to ~/.mc/config.json — only when the user wants it saved.
 mc alias set myminio https://play.min.io ACCESS_KEY SECRET_KEY
 ```
+
+The env var isn't a free pass on secrecy: a literal `export …` lands in shell
+history and the value shows in the process environment. Don't hard-code keys or
+echo them into logs. See `references/connect.md`.
 
 Once set, the alias name is the first path segment (`myminio/bucket/key`).
 Config lives in `~/.mc/config.json` (override with `--config-dir` or

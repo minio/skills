@@ -14,8 +14,13 @@ wrong.
 | `mc head [-n N] TARGET` | First N lines of an object (like `head`). |
 | `mc tree [-f] [-r] TARGET` | Prefixes as a tree. |
 | `mc du [--depth N] TARGET` | Disk usage per prefix. |
-| `mc find TARGET [--name … --older-than … --larger …]` | Server-side `find`: match by name/size/age/metadata; `--exec` runs a command per match. |
+| `mc find TARGET [--name … --older-than … --larger …]` | Match objects by name/size/age/metadata. Listing matches is read-only. |
 | `mc diff FIRST SECOND` | Compare two trees (local or remote); reports what differs. Read-only — it never changes anything. |
+
+`mc find --exec "cmd {}"` is **not** read-only: it runs a local shell command for
+every match, so it can modify the system or execute anything embedded in an
+object name. Treat it as a mutating operation — confirm before running, and
+never build the executed command from untrusted object names/keys.
 
 ## Read object contents
 

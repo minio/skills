@@ -34,7 +34,9 @@ Asynchronous bucket-to-bucket replication (server-to-server). The remote target
 must first be registered with `mc admin bucket remote add`, then:
 
 ```sh
-mc replicate add    myminio/mybucket --remote-bucket https://KEY:SECRET@peer/mybucket --priority 1
+# --remote-bucket embeds credentials in argv (visible in `ps`/history) — build it
+# from a secret source, e.g. --remote-bucket "https://${KEY}:${SECRET}@peer/mybucket"
+mc replicate add    myminio/mybucket --remote-bucket "$REMOTE_URL" --priority 1
 mc replicate ls     myminio/mybucket
 mc replicate status myminio/mybucket           # health + metrics
 mc replicate backlog myminio/mybucket          # what's pending

@@ -5,18 +5,22 @@ Iceberg REST catalog — a control plane distinct from the S3 object commands. I
 is AIStor-specific. Run `mc table --help` and `mc table <group> --help` for the
 exact subcommands and flags. The hierarchy is:
 
-```
+```text
 warehouse  →  namespace  →  table  (with views, tags, sharing, replication)
 ```
+
+Targets are a **single slash-path**, not separate arguments:
+`ALIAS/WAREHOUSE`, `ALIAS/WAREHOUSE/NAMESPACE`, `ALIAS/WAREHOUSE/NAMESPACE/TABLE`
+— each level adds a path segment.
 
 ## Warehouses
 
 A warehouse is the top-level container backed by a bucket.
 
 ```sh
-mc table warehouse create myminio mywarehouse
+mc table warehouse create myminio/mywarehouse
 mc table warehouse list   myminio
-mc table warehouse remove myminio mywarehouse         # irreversible — confirm
+mc table warehouse remove myminio/mywarehouse         # irreversible — confirm
 mc table warehouse maintenance …                      # compaction / cleanup policy
 ```
 
@@ -28,20 +32,21 @@ replication (`mc replicate`); use table replication (below) instead.
 Logical grouping within a warehouse (like a database/schema):
 
 ```sh
-mc table namespace create myminio mywarehouse mynamespace
-mc table namespace list   myminio mywarehouse
-mc table namespace info   myminio mywarehouse mynamespace
-mc table namespace delete myminio mywarehouse mynamespace
+mc table namespace create myminio/mywarehouse/mynamespace
+mc table namespace list   myminio/mywarehouse
+mc table namespace info   myminio/mywarehouse/mynamespace
+mc table namespace delete myminio/mywarehouse/mynamespace
 ```
 
 ## Tables
 
 ```sh
-mc table create   myminio mywarehouse mynamespace mytable --schema schema.json
-mc table list     myminio mywarehouse mynamespace
-mc table show     myminio mywarehouse mynamespace mytable      # schema, snapshots, metadata
-mc table rename   …
-mc table delete   myminio mywarehouse mynamespace mytable      # drops the table — irreversible
+# --schema takes the JSON schema as a string, not a filename — inline it or read a file in
+mc table create myminio/mywarehouse/mynamespace/mytable --schema "$(cat schema.json)"
+mc table list   myminio/mywarehouse/mynamespace
+mc table show   myminio/mywarehouse/mynamespace/mytable        # schema, snapshots, metadata
+mc table rename myminio/mywarehouse/mynamespace/mytable …
+mc table delete myminio/mywarehouse/mynamespace/mytable        # drops the table — irreversible
 mc table register …                                            # register an existing Iceberg table
 mc table tag set|list|remove …
 mc table encrypt set|info|clear …
@@ -64,7 +69,7 @@ Views: `mc table view create|list|show|drop|exists`.
 
 ## Agent guidance
 
-Table names, namespaces, and warehouses are positional arguments in a fixed
-order — when unsure of the exact arity, run the subcommand's `--help` rather
-than guessing. `delete`/`remove`/`drop` on any level (warehouse, namespace,
-table, view) discards metadata irreversibly; confirm with the user first.
+The target is one slash-path whose depth matches the level you're acting on —
+when unsure, run the subcommand's `--help` rather than guessing. `delete` /
+`remove` / `drop` on any level (warehouse, namespace, table, view) discards
+metadata irreversibly; confirm with the user first.

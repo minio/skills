@@ -18,17 +18,23 @@ Env-defined aliases (below) also appear in `mc alias list`, tagged with source
 ## Environment aliases — the agent default
 
 `mc` reads any variable named `MC_HOST_<alias>` and exposes `<alias>` as if it
-were configured. Nothing is written to disk, so this is the safest form for an
-agent and for ephemeral/CI use:
+were configured. It never writes credentials to `mc`'s config file, which makes
+it the preferred form for agents and ephemeral/CI use:
 
 ```sh
-export MC_HOST_myminio='https://ACCESS_KEY:SECRET_KEY@minio.example.net:9000'
+# Prefer injecting the value from a secret manager / CI secret, not a literal:
+export MC_HOST_myminio="https://${MINIO_ACCESS_KEY}:${MINIO_SECRET_KEY}@minio.example.net:9000"
 mc ls myminio/
 ```
 
+Caveat: an environment variable is still a secret in memory — a literal
+`export …` typed at a shell is saved to shell history, and the value is visible
+in the process environment (`/proc/<pid>/environ`, `ps e`). Set it from a secret
+source, avoid the plaintext literal, and don't echo it into logs.
+
 URL forms accepted in the value:
 
-```
+```text
 https://ACCESS_KEY:SECRET_KEY@HOST[:PORT]                    # long-term keys
 https://ACCESS_KEY:SECRET_KEY:SESSION_TOKEN@HOST[:PORT]      # STS / temporary creds
 https://HOST:PORT                                            # anonymous (public buckets)

@@ -7,14 +7,23 @@ line**, not a single JSON document. This is the single most important fact for
 parsing `mc`:
 
 ```sh
-mc ls --json myminio/mybucket | jq -c '.'          # correct: line by line
-mc ls --json myminio/mybucket | python -c 'import sys,json; [json.loads(l) for l in sys.stdin]'
+mc ls --json myminio/mybucket | jq -c '.'          # per-record, streaming
 ```
 
-Do **not** feed the whole stream to a single-document parser (`json.loads(all)`,
-`jq '.[]'` expecting an array) — it will fail on the second line. For streaming
-commands (`ls`, `find`, `cp`, `mirror`, `watch`) each line is emitted as the
-event happens, so you can consume incrementally.
+```python
+import sys, json
+for line in sys.stdin:                              # decode one record at a time
+    obj = json.loads(line)
+    ...                                             # handle obj, don't accumulate
+```
+
+Do **not** slurp the whole stream into one document — `json.loads(f.read())`
+fails after the first record because the lines aren't a single JSON value. `jq`
+already reads NDJSON one record at a time: use `jq -c '.'` for per-record
+streaming, and reach for `jq -s '.'` only when you deliberately want every
+record collected into one array (which loses the streaming benefit). For
+streaming commands (`ls`, `find`, `cp`, `mirror`, `watch`) each line is emitted
+as the event happens, so you can consume incrementally.
 
 Every record carries `"status"`: `"success"` or `"error"`. On failure the
 record includes `error.message` / `error.cause` and `mc` also exits non-zero:
