@@ -1,3 +1,5 @@
+[![skills.sh](https://skills.sh/b/minio/skills)](https://skills.sh/minio/skills)
+
 # MinIO Agent Skills
 
 Official [Agent Skills](https://agentskills.io) published by MinIO, for any
