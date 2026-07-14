@@ -1,0 +1,63 @@
+# Machine-readable output & scripting
+
+## `--json` is JSON Lines (NDJSON)
+
+`--json` (global; also `MC_JSON=on`) makes `mc` print **one JSON object per
+line**, not a single JSON document. This is the single most important fact for
+parsing `mc`:
+
+```sh
+mc ls --json myminio/mybucket | jq -c '.'          # correct: line by line
+mc ls --json myminio/mybucket | python -c 'import sys,json; [json.loads(l) for l in sys.stdin]'
+```
+
+Do **not** feed the whole stream to a single-document parser (`json.loads(all)`,
+`jq '.[]'` expecting an array) — it will fail on the second line. For streaming
+commands (`ls`, `find`, `cp`, `mirror`, `watch`) each line is emitted as the
+event happens, so you can consume incrementally.
+
+Every record carries `"status"`: `"success"` or `"error"`. On failure the
+record includes `error.message` / `error.cause` and `mc` also exits non-zero:
+
+```sh
+mc stat --json myminio/mybucket/key | jq -e '.status == "success"'
+```
+
+## Exit codes drive control flow
+
+`mc` exits `0` on success and non-zero on any failure. Branch on the exit code,
+never on scraping human-readable stdout:
+
+```sh
+if mc stat myminio/mybucket/key >/dev/null 2>&1; then
+  echo "exists"
+fi
+```
+
+Note streaming commands: `mc cp`/`mirror` return non-zero if any item failed.
+
+## Non-interactive operation
+
+- Some commands prompt for confirmation on dangerous actions
+  (`rm --recursive`, `rb`). The required flags (`--force`, `--dangerous`) are
+  what let them run unattended — see `references/objects.md`. If a command still
+  blocks on a prompt, that is a signal to stop and confirm with the user, not to
+  auto-answer.
+- `mc alias set` with keys omitted prompts on stdin; provide keys via args (they
+  hit shell history) or pipe them in for unattended runs.
+- `--quiet` (`-q`, or `MC_QUIET=on`) removes progress bars and spinners — use it
+  in logs/CI so output is deterministic. `--no-color` / `MC_NO_COLOR=on` strips
+  ANSI. `mc` auto-disables color when stdout is not a TTY.
+
+## Useful shapes
+
+- `mc ls --json` → per object: `key`, `size`, `lastModified`, `etag`,
+  `type` (`file`/`folder`), `storageClass`, plus `versionId` with `--versions`.
+- `mc stat --json` → object/bucket metadata, user metadata, tags, encryption,
+  retention.
+- `mc du --json` → cumulative size per prefix.
+- `mc diff --json` → one record per differing path with a status flag.
+
+When a shape matters, capture one line and inspect it (`mc ls --json … | head -1
+| jq .`) rather than assuming field names — they can vary by command and server
+version.
