@@ -14,10 +14,30 @@ mirrors the object's path:
 .aimem/annot/<object-path>/@<note-name>
 ```
 
+**`<object-path>` is the object's _complete_ workspace path, copied exactly,
+including every directory prefix.** Take the same path you read the object
+at and splice it in verbatim — do not flatten it, drop leading directories,
+or use only the basename. If you read metadata from `data/shard-000.parquet`,
+its notes live under `.aimem/annot/data/shard-000.parquet/`, **not**
+`.aimem/annot/shard-000.parquet/`:
+
+```sh
+# object at data/shard-000.parquet  ->  keep the data/ prefix:
+echo 'reviewed: imagenet, 50k rows, public' \
+    > .aimem/annot/data/shard-000.parquet/@review
+```
+
 So notes about `src/auth.rs` live in `.aimem/annot/src/auth.rs/` and a
 note named `review` is the file `.aimem/annot/src/auth.rs/@review`. The
 leading **`@`** marks it as an annotation (never a real sub-path of the
 object), so annotations can never collide with actual keys.
+
+If a note write fails with an I/O error or "No such file or directory", you
+almost certainly used the wrong `<object-path>` (a dropped directory prefix
+or a stale name) — you do **not** need to `mkdir` the annotation directory,
+it resolves automatically for an object that exists. Re-derive the path from
+the object's exact key and retry; do not conclude the annotation channel is
+unavailable.
 
 ## The habit: read before you edit, write after you reason
 
