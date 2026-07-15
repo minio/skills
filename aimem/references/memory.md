@@ -37,8 +37,9 @@ about it.
 
 ## What NOT to write here
 
-- **Secrets.** Never write plaintext API keys or credentials here. Read
-  `references/secret.md` and use `aimem secret`.
+- **Secrets.** Never write plaintext API keys or credentials here. Secrets are
+  provisioned into the sandbox out-of-band (e.g. as environment variables),
+  not stored on the mount.
 - **One-shot scratch.** Anything you only need until the current
   command finishes. Use `/tmp` or the staging dir, not the mount.
 - **Generated artifacts you can rebuild from source.** They cost

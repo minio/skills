@@ -31,8 +31,9 @@ object metadata, not as object bytes — and are not ordinary objects.
 - For agent memory (CLAUDE.md, AGENTS.md, MEMORY.md, project plans): write
   under the mount so they persist across sandbox restarts. See
   `references/memory.md` for the conventions aimem warms on mount.
-- For secrets: never put plaintext credentials in mount files; use
-  `aimem secret` (see `references/secret.md`).
+- For secrets: never put plaintext credentials in mount files. Secrets are
+  provisioned into the sandbox out-of-band (e.g. as environment variables),
+  not stored on the mount.
 
 ## Object metadata & tags
 
