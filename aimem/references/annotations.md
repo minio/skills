@@ -107,4 +107,4 @@ can `ls` and read only what it needs.
 
 Annotations are one tool on this mount. For the full workspace orientation
 and the rest of the skill, see `SKILL.md` and the sibling references
-(`navigation.md`, `workspace.md`, `memory.md`, `metadata.md`, `secret.md`).
+(`navigation.md`, `workspace.md`, `memory.md`, `metadata.md`).

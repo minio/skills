@@ -1,6 +1,6 @@
 ---
 name: aimem
-description: Use when working inside an AIMem workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, how to read object metadata, and how to use secrets.
+description: Use when working inside an AIMem workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, and how to read object metadata.
 license: Apache-2.0
 compatibility: Requires a mounted AIMem (MinIO AIStor) FUSE workspace; uses findmnt and the aimem CLI.
 metadata:
@@ -45,5 +45,3 @@ Read these (co-located with this file, under `references/`) on demand:
 - **`references/annotations.md`** — how to attach durable, named notes to any
   object (read before you edit, write after you reason) via
   `.aimem/annot/<path>/@<name>`.
-- **`references/secret.md`** — how to read and write secrets via
-  `aimem secret` when the mount has secrets configured.
