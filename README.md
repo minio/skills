@@ -18,7 +18,7 @@ them with one command, no MinIO source checkout required.
 
 | Skill                | Install                            | What it does                                                                                     |
 | -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [`aimem`](./aimem)   | `npx skills add minio/skills/aimem` | Work inside an [AIMem](https://docs.min.io/aimem) workspace — locate the mount, durability semantics, agent memory, object metadata/annotations, and secrets. |
+| [`aimem`](./aimem)   | `npx skills add minio/skills/aimem` | Work inside an [AIStor Memory](https://docs.min.io/aimem) workspace — locate the mount, durability semantics, agent memory, object metadata/annotations, and secrets. |
 | [`mc`](./mc)         | `npx skills add minio/skills/mc`   | Drive `mc`, the AIStor command-line client — connect via an alias, list/copy/remove objects and buckets, and run bucket config, replication, lifecycle, cluster admin, and Tables operations non-interactively with JSON-lines output. |
 
 ## Installing
@@ -45,9 +45,9 @@ cp -r aimem ~/.agents/skills/aimem
 
 ### When do I need to install manually?
 
-AIMem installs the `aimem` skill into your home skill directories
+AIStor Memory installs the `aimem` skill into your home skill directories
 **automatically on every mount**, so if your agent's reasoning runs *inside* the
-sandbox where AIMem is mounted, you do not need this repo.
+sandbox where AIStor Memory is mounted, you do not need this repo.
 
 Install from here when your agent's reasoning runs **outside** the sandbox — for
 example the OpenAI Agents SDK or other managed-agent harnesses, where the model

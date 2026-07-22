@@ -3,11 +3,11 @@
 ## Locate your mount
 
 This skill ships generically, so it doesn't hard-code your bucket. Find the
-mount point (all AIMem mounts share the source `aimem`):
+mount point (all AIStor Memory mounts share the source `aimem`):
 
 ```sh
-findmnt -S aimem                   # prints the mount point; source "aimem" identifies AIMem
-mount | grep -E '^aimem on '       # same, portable fallback
+findmnt -n -o TARGET -S aimem       # prints the mount point path; source "aimem" identifies AIStor Memory
+mount | awk '$1=="aimem"{print $3}' # same, portable fallback
 ```
 
 These locate the mount only — they do not expose the bucket, region, or
