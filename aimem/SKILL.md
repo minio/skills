@@ -22,8 +22,8 @@ This skill is generic — it doesn't know which bucket you're on or where it's
 mounted. Locate your AIStor Memory mount(s) yourself:
 
 ```sh
-findmnt -S aimem             # AIStor Memory's mount source is "aimem"; prints the mountpoint
-                             # portable fallback: mount | grep -E '^aimem on '
+findmnt -n -o TARGET -S aimem   # AIStor Memory's mount source is "aimem"; prints the mountpoint path
+                                # portable fallback: mount | awk '$1=="aimem"{print $3}'
 ```
 
 The path it reports is your workspace root; the reference docs below call it
