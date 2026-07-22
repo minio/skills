@@ -1,6 +1,6 @@
 # Searching cortex memory (`aimem search`)
 
-When your AIMem workspace is backed by a **cortex** (Memory Bucket), you can
+When your AIStor Memory workspace is backed by a **cortex** (Memory Bucket), you can
 grep its entire contents — server-side, over compressed + encrypted data at
 rest — without downloading the workspace. The server decrypts and decompresses
 each object as it scans, so matches come back as plaintext.

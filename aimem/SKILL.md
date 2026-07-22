@@ -1,8 +1,8 @@
 ---
 name: aimem
-description: Use when working inside an AIMem workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, and how to read object metadata.
+description: Use when working inside an AIStor Memory workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, and how to read object metadata.
 license: Apache-2.0
-compatibility: Requires a mounted AIMem (MinIO AIStor) FUSE workspace; uses findmnt and the aimem CLI.
+compatibility: Requires a mounted AIStor Memory FUSE workspace; uses findmnt and the aimem CLI.
 metadata:
   maintainer: MinIO
   homepage: https://docs.min.io/aimem
@@ -10,7 +10,7 @@ metadata:
 
 # aimem workspace
 
-You are (or may be) operating inside an **AIMem** mount: a FUSE filesystem
+You are (or may be) operating inside an **AIStor Memory** mount: a FUSE filesystem
 that backs every read and write to a remote MinIO AIStor bucket. A write is
 durable and survives sandbox restart once `fsync()` or `close()` completes its
 upload — see `references/workspace.md` for what is still at risk before that.
@@ -19,15 +19,15 @@ Files other agents wrote to the same bucket are visible here too.
 ## Find your mount
 
 This skill is generic — it doesn't know which bucket you're on or where it's
-mounted. Locate your AIMem mount(s) yourself:
+mounted. Locate your AIStor Memory mount(s) yourself:
 
 ```sh
-findmnt -S aimem             # AIMem's mount source is "aimem"; prints the mountpoint
+findmnt -S aimem             # AIStor Memory's mount source is "aimem"; prints the mountpoint
                              # portable fallback: mount | grep -E '^aimem on '
 ```
 
 The path it reports is your workspace root; the reference docs below call it
-`<mount-root>`. If nothing is reported, no AIMem mount is present in this
+`<mount-root>`. If nothing is reported, no AIStor Memory mount is present in this
 environment and this skill does not apply.
 
 ## Reference docs
