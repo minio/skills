@@ -19,6 +19,7 @@ them with one command, no MinIO source checkout required.
 | Skill                | Install                            | What it does                                                                                     |
 | -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
 | [`aimem`](./aimem)   | `npx skills add minio/skills/aimem` | Work inside an [AIStor Memory](https://docs.min.io/aimem) workspace — locate the mount, durability semantics, agent memory, object metadata/annotations, and secrets. |
+| [`docs`](./docs)     | `npx skills add minio/skills/docs` | Write documentation to the ISO 24495-1 Plain Language standard — the four governing principles (relevant, findable, understandable, usable), the plan/write/evaluate/revise process, and a self-check before you save. |
 | [`mc`](./mc)         | `npx skills add minio/skills/mc`   | Drive `mc`, the AIStor command-line client — connect via an alias, list/copy/remove objects and buckets, and run bucket config, replication, lifecycle, cluster admin, and Tables operations non-interactively with JSON-lines output. |
 
 ## Installing
@@ -61,6 +62,10 @@ Each top-level directory is one skill and must contain a spec-compliant
 
 - `name` — lowercase, digits, hyphens; **must match the directory name**.
 - `description` — what it does and when to use it (≤ 1024 chars).
+
+Write the prose in your `SKILL.md` and `references/` the way the
+[`docs`](./docs) skill requires: ISO 24495-1 Plain Language. A skill is
+documentation an agent reads, so the same standard applies.
 
 See the [Agent Skills specification](https://agentskills.io/specification).
 Validate locally with `skills-ref validate ./<skill>`.
