@@ -31,7 +31,7 @@ Other flags: `--no-recursive` (only keys directly under `--prefix`),
 Connection comes from the standard flags/env (`--endpoint-url` /
 `AIMEM_ENDPOINT_URL`, `--access-key` / `AIMEM_ACCESS_KEY`, `--secret-key` /
 `AIMEM_SECRET_KEY`, optional `--session-token`). Output is one matching object
-key per line, or — with `--content` — `name:line[:col]:text` matching lines
+key per line. With `--content`, each matching line is `name:line[:col]:text`
 (context lines on `name-…` separators). A stderr summary reports
 `N matches in M files / K scanned`, adding `/ skipped`, `/ errors`, and
 `(truncated)` when relevant.

@@ -34,8 +34,8 @@ environment and this skill does not apply.
 
 Read these (co-located with this file, under `references/`) on demand:
 
-- **`references/navigation.md`** — how to identify the bucket/region/endpoint
-  of your mount, and the conventional layout of files at the root.
+- **`references/navigation.md`** — how to locate your mount and the
+  conventional layout of files at its root.
 - **`references/workspace.md`** — POSIX semantics: copy-on-write staging,
   close/fsync durability, rename, and what doesn't work.
 - **`references/memory.md`** — where to put long-lived agent context

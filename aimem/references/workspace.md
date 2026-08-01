@@ -27,11 +27,11 @@ This means:
   opening. aimem warns at mount if free space is below the
   configured threshold.
 - **Concurrent writers fight.** If two processes open the same path
-  for writing, whichever closes last wins — close order isn't
-  guaranteed to match open order — and the other's data is silently
-  overwritten. This is this mount's staged-upload policy (the last
-  `close()` is what gets uploaded), not a universal POSIX guarantee —
-  worth re-stating here because the blast radius is the bucket.
+  for writing, whichever closes last wins, and the other's data is
+  silently overwritten. Close order isn't guaranteed to match open
+  order. This is this mount's staged-upload policy (the last
+  `close()` is what gets uploaded), not a universal POSIX guarantee,
+  and the blast radius is the bucket.
 
 ## Rename
 

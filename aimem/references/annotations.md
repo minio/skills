@@ -34,7 +34,7 @@ object), so annotations can never collide with actual keys.
 
 If a note write fails with an I/O error or "No such file or directory", you
 almost certainly used the wrong `<object-path>` (a dropped directory prefix
-or a stale name) — you do **not** need to `mkdir` the annotation directory,
+or a stale name). You do **not** need to `mkdir` the annotation directory;
 it resolves automatically for an object that exists. Re-derive the path from
 the object's exact key and retry; do not conclude the annotation channel is
 unavailable.
