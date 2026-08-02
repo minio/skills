@@ -3,8 +3,8 @@
 aimem warms a curated set of well-known agent memory files into
 its read cache on mount, so that recalling them from a fresh
 sandbox is fast. Write your project context to one of these
-conventional paths and other agents on this mount will be able to
-read it without you having to point at it.
+conventional paths. Other agents on this mount can then read it
+without you pointing them at it.
 
 The exact set warmed depends on the `--agent` profile the mount was
 started with (claude, codex, cursor, or auto — which warms all of

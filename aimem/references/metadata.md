@@ -49,11 +49,11 @@ lookup/listing. The filesystem does not reject a
 `setfattr -n user.s3.meta.foo -v bar path` — but it does **not** update
 the object's native S3 user metadata or create an S3 tag either. The
 value is instead stored under aimem's own private, base64-encoded
-`xattr-` header and uploaded under that key on next close/sync; the
+`xattr-` header and uploaded under that key on next close/sync. The
 `user.s3.meta.*`/`user.s3.tags.*` reflection keeps coming from the
 native headers, so your value never appears back under the name you set
-it — even though the write itself did persist, just not where you'd look
-for it. Treat both namespaces as observe-only.
+it. The write itself did persist — just not where you'd look for it.
+Treat both namespaces as observe-only.
 
 To attach durable, natively-visible metadata to an object, set it where
 the object is produced (the writer/uploader that PUTs it), not via

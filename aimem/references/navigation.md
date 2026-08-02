@@ -16,9 +16,9 @@ mount point is the root of the configured prefix, not necessarily the bucket
 itself: `ls <mount-root>` lists the top-level objects under that prefix, plus
 the synthetic `.aimem/` namespace (e.g. `.aimem/annot/` for object
 annotations). Every ordinary persistent file you read or write under the mount
-maps to an object on the backing MinIO AIStor bucket; entries under `.aimem/`
-are agent-native surfaces — object annotations are stored as native AIStor
-object metadata, not as object bytes — and are not ordinary objects.
+maps to an object on the backing MinIO AIStor bucket. Entries under `.aimem/`
+are agent-native surfaces, not ordinary objects — object annotations are stored
+as native AIStor object metadata, not as object bytes.
 
 ## How to find things
 
