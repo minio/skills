@@ -24,6 +24,9 @@ aimem search <cortex> -e 'todo' -i -C 2 --content --column
 aimem search <cortex> -U -e '(?s)BEGIN.*END' --content
 ```
 
+`--ext` takes the extension with or without the leading dot — `md` and `.md`
+are equivalent.
+
 Other flags: `--no-recursive` (only keys directly under `--prefix`),
 `--max-file-size <bytes>` (skip larger objects), `--max-total-bytes <bytes>`
 (bound the response for your context window).
@@ -43,3 +46,8 @@ Notes:
   (`.warehouse/`, `.namespaces/`, `.maintenance/`, and table data).
 - `(truncated)`, or a non-zero `errors` count, means the result set is partial —
   narrow with `--prefix` / `--ext`, or raise `--max-total-bytes`.
+- If your filters exclude every candidate, the summary is followed by
+  `note: … excluded every object; nothing was searched`. That is a filter
+  problem (a mistyped `--ext`, too small a `--max-file-size`), not an absence
+  of matches — fix the filter and search again rather than concluding the
+  pattern isn't there.
