@@ -21,6 +21,7 @@ them with one command, no MinIO source checkout required.
 | [`aimem`](./aimem)   | `npx skills add minio/skills/aimem` | Work inside an [AIStor Memory](https://docs.min.io/aimem) workspace — locate the mount, durability semantics, agent memory, object metadata/annotations, and secrets. |
 | [`docs`](./docs)     | `npx skills add minio/skills/docs` | Write documentation to the ISO 24495-1 Plain Language standard — the four governing principles (relevant, findable, understandable, usable), the plan/write/evaluate/revise process, and a self-check before you save. |
 | [`mc`](./mc)         | `npx skills add minio/skills/mc`   | Drive `mc`, the AIStor command-line client — connect via an alias, list/copy/remove objects and buckets, and run bucket config, replication, lifecycle, cluster admin, and Tables operations non-interactively with JSON-lines output. |
+| [`pr-autofix`](./pr-autofix) | `npx skills add minio/skills/pr-autofix` | Act on every review comment on a pull request — CodeRabbit, Copilot, Gemini, other review bots, and people. Recovers the CodeRabbit findings that never reach the diff, removes duplicates, then applies fixes one at a time with your approval. |
 
 ## Installing
 
