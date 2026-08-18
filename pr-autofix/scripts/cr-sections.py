@@ -111,13 +111,27 @@ def finalize(item, source):
     return item
 
 
+def entries(stream):
+    decoder = json.JSONDecoder()
+    text = stream.read().strip()
+    position = 0
+    while position < len(text):
+        payload, offset = decoder.raw_decode(text, position)
+        position = offset
+        while position < len(text) and text[position].isspace():
+            position += 1
+        yield from (payload if isinstance(payload, list) else [payload])
+
+
+def is_coderabbit(entry):
+    actor = entry.get("user") or entry.get("author") or {}
+    kind = actor.get("type") or actor.get("__typename")
+    return kind == "Bot" and "coderabbit" in (actor.get("login") or "").lower()
+
+
 def main():
-    payload = json.load(sys.stdin)
-    if isinstance(payload, dict):
-        payload = [payload]
-    for entry in payload:
-        actor = entry.get("user") or entry.get("author") or {}
-        if "coderabbit" not in (actor.get("login") or "").lower():
+    for entry in entries(sys.stdin):
+        if not is_coderabbit(entry):
             continue
         source = entry.get("html_url") or entry.get("url") or ""
         for item in findings(entry.get("body") or ""):

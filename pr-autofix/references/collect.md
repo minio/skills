@@ -56,6 +56,8 @@ while :; do
             line
             startLine
             comments(first:50) {
+              totalCount
+              pageInfo { hasNextPage endCursor }
               nodes {
                 databaseId
                 url
@@ -78,7 +80,7 @@ while :; do
 
   if jq -e '.errors' "$work/page-$page.json" >/dev/null; then
     jq -r '.errors[].message' "$work/page-$page.json"
-    break
+    exit 1
   fi
 
   jq -c '.data.repository.pullRequest.reviewThreads.nodes[]' \
@@ -101,12 +103,58 @@ exceeds the argument size limit, and the fetch fails part-way with
 comment text never becomes a command argument.
 
 `gh` exits zero on a GraphQL error, so the loop checks for an `errors` key and
-prints it. If anything is printed, stop the run and report it to the user. Without that check an unreachable pull request leaves an empty
+prints it and exits non-zero, so the block stops before writing
+`threads.json` from partial pages. A partial file is worse than no file: it reads
+as a pull request with no feedback. Without that check an unreachable pull request leaves an empty
 `threads.json` and the run looks like a pull request with no feedback.
 
 `comments(first:50)` fetches the whole chain on purpose. The first comment states
 the issue; the **last** comment often withdraws it ("never mind, I misread") or
 adds to it. Read the tail before you treat a thread as open.
+
+### Complete any thread that holds more than 50 comments
+
+A long argument in one thread can run past 50 comments, and the tail is the part
+that decides whether the request still stands. Find those threads:
+
+```bash
+owner=$(gh repo view --json owner --jq '.owner.login')
+repo=$(gh repo view --json name --jq '.name')
+pr_number=$(gh pr list --head "$(git branch --show-current)" --state open --json number --jq '.[0].number')
+work="${TMPDIR:-/tmp}/pr-autofix/$owner-$repo-$pr_number"
+
+jq -r '.[] | select(.comments.pageInfo.hasNextPage)
+  | "\(.id)\t\(.comments.pageInfo.endCursor)"' "$work/threads.json"
+```
+
+Most pull requests print nothing here. For each line that does print, page the
+rest of that thread by its id, feeding `endCursor` back as `$cursor` until
+`hasNextPage` is false:
+
+```bash
+gh api graphql -F id="$thread_id" -F cursor="$cursor" \
+  -f query='query($id:ID!, $cursor:String) {
+    node(id:$id) {
+      ... on PullRequestReviewThread {
+        comments(first:50, after:$cursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes {
+            databaseId
+            url
+            body
+            isMinimized
+            createdAt
+            author { login __typename }
+          }
+        }
+      }
+    }
+  }'
+```
+
+Append those comments to the thread before you classify it. `totalCount` on each
+thread tells you how many comments exist, so you can check that what you hold is
+complete.
 
 ## 2. Review summary bodies
 
@@ -193,17 +241,22 @@ mkdir -p "$work"
 in_flight=$(jq -n \
   --slurpfile reviews "$work/reviews.json" \
   --slurpfile comments "$work/comments.json" '
-  ($reviews[0]
+  ([$reviews[][]]
    | map(select(.user.type == "Bot" and ((.body // "") != "")))
    | group_by(.user.login)
    | map({key: .[0].user.login, value: (map(.submitted_at) | max)})
    | from_entries) as $posted
-  | $comments[0]
+  | [$comments[][]]
   | map(select(.user.type == "Bot")
         | select((.body // "") | test("come back again in a few minutes|is reviewing|review in progress|review queued"; "i"))
         | select(.updated_at > ($posted[.user.login] // "")))
   | length')
 ```
+
+`[$reviews[][]]` flattens every page in the file. `gh api --paginate` merges
+array endpoints into one array today, so this reads the same as indexing the
+first document, and it keeps reading correctly if a `gh` version ever emits one
+array per page. Indexing `[0]` would silently see only the first page.
 
 This also catches the case that matters most: a reviewer that already reviewed an
 earlier commit and is now re-reviewing the one you just pushed. Its old findings
