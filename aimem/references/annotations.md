@@ -30,7 +30,7 @@ its notes live under `.aimem/annot/data/shard-000.parquet/`, **not**
 ```sh
 # object at data/shard-000.parquet  ->  keep the data/ prefix:
 echo 'reviewed: imagenet, 50k rows, public' \
-    > .aimem/annot/data/shard-000.parquet/@review
+    | tee .aimem/annot/data/shard-000.parquet/@review >/dev/null
 ```
 
 So notes about `src/auth.rs` live in `.aimem/annot/src/auth.rs/` and a
@@ -70,19 +70,23 @@ onto the object so the next agent inherits it:
 
 ```sh
 echo 'auth() has no rate limiting; see ticket AUTH-42' \
-    > .aimem/annot/src/auth.rs/@review
+    | tee .aimem/annot/src/auth.rs/@review >/dev/null
 ```
 
 ## Reading and writing
 
-| Action                 | Command                                       |
-| ---------------------- | --------------------------------------------- |
-| List an object's notes | `ls .aimem/annot/<path>/`                     |
-| See all notes at once  | `cat .aimem/annot/<path>/@all`                |
-| Read one note          | `cat .aimem/annot/<path>/@<name>`             |
-| Create / overwrite     | `echo '…' > .aimem/annot/<path>/@<name>`      |
-| Append                 | `printf '…\n' >> .aimem/annot/<path>/@<name>` |
-| Delete                 | `rm .aimem/annot/<path>/@<name>`              |
+| Action                 | Command                                          |
+| ---------------------- | ------------------------------------------------ |
+| List an object's notes | `ls .aimem/annot/<path>/`                        |
+| See all notes at once  | `cat .aimem/annot/<path>/@all`                   |
+| Read one note          | `cat .aimem/annot/<path>/@<name>`                |
+| Create / overwrite     | `echo '…' \| tee .aimem/annot/<path>/@<name>`    |
+| Append                 | `echo '…' \| tee -a .aimem/annot/<path>/@<name>` |
+| Delete                 | `rm .aimem/annot/<path>/@<name>`                 |
+
+Write notes with `tee` (or `cp`), not a shell redirection. A note is saved
+when the file closes, and `>` and `>>` do not report an error raised there,
+so a failed write would look like it succeeded.
 
 A write replaces the whole note; truncating it to empty (`: >`) deletes
 it. All of this is plain POSIX — use `open`/`read`/`write` from any
