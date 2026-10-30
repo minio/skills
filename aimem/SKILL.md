@@ -44,6 +44,7 @@ Read these (co-located with this file, under `references/`) on demand:
   tags as xattrs, pre-warmed by `ls`.
 - **`references/annotations.md`** — how to attach durable, named notes to any
   object (read before you edit, write after you reason) via
-  `.aimem/annot/<path>/@<name>`.
+  `.aimem/annot/<path>/@<name>`. They may be switched off on the server; a
+  note write then fails with "Operation not supported".
 - **`references/search.md`** — how to grep the whole cortex server-side with
   `aimem search` (regex over compressed+encrypted data at rest).

@@ -7,6 +7,12 @@ store, right next to the object it describes, and travels with the data.
 No separate memory database, no extra service: the reasoning you build up
 about a file is co-located with that file.
 
+> **Annotations are a tech preview and may be switched off on this server.**
+> While they are off, writing a note fails with "Operation not supported"
+> (`ENOTSUP`), and an object shows no notes. That is not a path mistake, so do
+> not retry. Carry on without notes, and keep anything you need to remember in
+> a memory file (see `memory.md`).
+
 aimem surfaces annotations as files under a synthetic directory that
 mirrors the object's path:
 
@@ -37,7 +43,8 @@ almost certainly used the wrong `<object-path>` (a dropped directory prefix
 or a stale name). You do **not** need to `mkdir` the annotation directory;
 it resolves automatically for an object that exists. Re-derive the path from
 the object's exact key and retry; do not conclude the annotation channel is
-unavailable.
+unavailable. The one exception is "Operation not supported": that means
+annotations are switched off on the server (see the note at the top).
 
 ## The habit: read before you edit, write after you reason
 
