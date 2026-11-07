@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: write-troubleshooting-section
+expected_outcome: |
+  A TROUBLESHOOTING.md with one section per problem, each headed by the
+  symptom or error the user sees, giving the cause and then the fix as an
+  instruction the user can run. The --insecure option carries a clear
+  warning that it is for testing only.
