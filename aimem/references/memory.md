@@ -2,9 +2,14 @@
 
 aimem warms a curated set of well-known agent memory files into
 its read cache on mount, so that recalling them from a fresh
-sandbox is fast. Write your project context to one of these
-conventional paths. Other agents on this mount can then read it
-without you pointing them at it.
+sandbox is fast. The table below lists what aimem warms; it is not
+a rule about where to save. Save startup context in the instruction
+file your agent loads from the directory it opens as its project
+(`CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and most
+others). When that project directory is the mount root, the file is
+also warmed. If the project directory is not on the mount, its
+instruction file is lost with the sandbox: keep the notes on the
+mount, and tell the next session where they are.
 
 Paths are relative to the mount root. The exact set warmed depends on the `--agent` profile the mount was
 started with (claude, codex, cursor, or auto — which warms all of
