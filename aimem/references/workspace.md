@@ -13,19 +13,20 @@ small set of consequences worth understanding.
 2. Your reads and writes operate on that local file directly. They
    are fast, they support arbitrary seeks, and they never round-trip
    to the network.
-3. On `fsync`, and again on close (the last `release` of the file
-   descriptor), aimem uploads the local file back to the bucket. The
-   S3 object becomes visible to other clients only after an upload
-   completes.
+3. On close, aimem uploads the local file back to the bucket. The S3
+   object becomes visible to other clients only after that upload
+   completes. `fsync` flushes the local file to disk but does not
+   upload it.
 
 This means:
 
-- **Writes are not durable until `fsync` or close.** Each `write()`
-  lands in the local staging file only. `fsync(2)` commits it to the
-  bucket, so it is a real durability barrier — call it if you need the
-  data safe before you are ready to close the descriptor. Otherwise the
-  upload happens on close, and anything not yet committed is lost if the
-  sandbox crashes mid-edit.
+- **Writes are not durable until close.** Each `write()` lands in the
+  local staging file only, and anything not yet uploaded is lost if the
+  sandbox goes away mid-edit. `fsync(2)` flushes the local copy to disk
+  but does not upload it. To checkpoint to the bucket, close the file and
+  reopen it. If `close()` reports an
+  error, the upload may still have happened: read the file back before
+  you write it again.
 - **The local store needs free space.** If you're going to
   write a 10 GB file, ensure there are 10 GB free locally before
   opening. aimem warns at mount if free space is below the
@@ -46,11 +47,13 @@ This means:
 onto an existing name. aimem uses the server's `RenameObject`, which
 moves the object in one atomic step, so no client ever sees both the
 old and the new name. One exception: when you rename onto a name that
-some process has open, aimem first moves that file aside so its
-readers keep their bytes, and another client can briefly find the
-destination missing. There is no copy-then-delete fallback: on a
-backend without `RenameObject`, `rename(2)` fails rather than leaving
-a half-finished move.
+a process on this mount has open, aimem first moves that file aside so
+those readers keep their bytes, and another client can briefly find
+the destination missing. Readers on other mounts get no such
+protection and may read the replacement. There is no copy-then-delete
+fallback: on a backend without `RenameObject`, a rename that has to
+move an object on the server fails rather than leaving a half-finished
+move.
 
 ## Unlink, mkdir, rmdir
 
@@ -68,8 +71,7 @@ it, survive a remount.
   executable bit you set on a script stays set. If the file is already on
   the store, the change is pushed before the call returns; if the file
   has an open writer, the attributes travel with that file's next upload,
-  so a crash before `fsync` or close loses them along with the unwritten
-  data.
+  so a crash before close loses them along with the unwritten data.
 - **`mmap` works, indirectly.** The FUSE `mmap` op itself is not
   implemented, so the kernel falls back to `read`/`write`. Mapping a file,
   and `exec`ing a binary you just linked on the mount, both behave

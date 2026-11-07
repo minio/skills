@@ -12,7 +12,7 @@ metadata:
 
 You are (or may be) operating inside an **AIStor Memory** mount: a FUSE filesystem
 that backs every read and write to a remote MinIO AIStor bucket. A write is
-durable and survives sandbox restart once `fsync()` or `close()` completes its
+durable and survives sandbox restart once `close()` completes its
 upload — see `references/workspace.md` for what is still at risk before that.
 Files other agents wrote to the same bucket are visible here too.
 
@@ -34,13 +34,16 @@ environment and this skill does not apply.
 
 These hold for every task on the mount. The references explain each in depth.
 
-- **A write is safe once `close()` or `fsync()` returns success.** Until then
-  your bytes are only in a local staged copy, and a sandbox crash loses them.
-  If either call fails, the upload did not happen: keep the data and write it
-  again. Call `fsync` when you need a checkpoint without closing.
+- **A write reaches the bucket when `close()` returns success.** Until then
+  your bytes are only in a local staged copy, and losing the sandbox loses
+  them. `fsync` flushes that local copy to disk but does not upload it: to
+  checkpoint to the bucket, close the file and reopen it.
+  If `close()` fails, the upload may or may not have happened. Keep your data,
+  read the file back, and write it again only if your change is missing.
 - **Keep what the next session needs in the instruction file your agent
-  loads at startup**, at the mount root: `CLAUDE.md` for Claude Code,
-  `AGENTS.md` for Codex, Cursor and most others. Your context window ends with
+  loads at startup**, in the directory it opens as its project (often the
+  mount root): `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and
+  most others. Your context window ends with
   the sandbox; the mount does not. A note in any other file is read only if
   something tells the next session to read it.
 - **Put throwaway output in `/tmp`, not the mount.** Everything under the mount
