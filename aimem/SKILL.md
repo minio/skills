@@ -47,5 +47,6 @@ Read these (co-located with this file, under `references/`) on demand:
   `.aimem/annot/<path>/@<name>`. They may be switched off on the server; a
   note write then fails with "Operation not supported". Do not retry it; keep
   what you need in a memory file instead.
-- **`references/search.md`** — how to grep the whole cortex server-side with
-  `aimem search` (regex over compressed+encrypted data at rest).
+- **`references/search.md`** — how to grep the bucket server-side with
+  `aimem search`, within whatever prefix your credential is scoped to (regex
+  over compressed+encrypted data at rest).

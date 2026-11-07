@@ -1,6 +1,6 @@
-# Searching cortex memory (`aimem search`)
+# Searching memory (`aimem search`)
 
-When your AIStor Memory workspace is backed by a **cortex** (Memory Bucket), you can
+When your AIStor Memory workspace is backed by a **Memory Bucket**, you can
 grep its entire contents — server-side, over compressed + encrypted data at
 rest — without downloading the workspace. The server decrypts and decompresses
 each object as it scans and returns grep-style matches.
@@ -11,29 +11,30 @@ one by one. The flags mirror `grep`/`ripgrep`.
 ```sh
 # Names only (files with matches, like `rg -l`). All patterns must match (AND);
 # RE2 syntax.
-aimem search <cortex> -e 'ZEBRA[A-Z]+'
+aimem search <bucket> -e 'ZEBRA[A-Z]+'
 
 # Matching lines with line numbers (name:line:text), like grep.
-aimem search <cortex> --prefix notes/ --ext md -e 'deadline' --content
+aimem search <bucket> --prefix notes/ --ext md -e 'deadline' --content
 
 # Case-insensitive (-i), context lines (-C / -A / -B), column (--column).
-aimem search <cortex> -e 'todo' -i -C 2 --content --column
+aimem search <bucket> -e 'todo' -i -C 2 --content --column
 
 # Multiline: let a pattern span lines (ripgrep -U). '.' crosses newlines only
 # with the (?s) flag.
-aimem search <cortex> -U -e '(?s)BEGIN.*END' --content
+aimem search <bucket> -U -e '(?s)BEGIN.*END' --content
 ```
-
-`--ext` takes the extension with or without the leading dot — `md` and `.md`
-are equivalent.
 
 Other flags: `--no-recursive` (only keys directly under `--prefix`),
 `--max-file-size <bytes>` (skip larger objects), `--max-total-bytes <bytes>`
 (bound the response for your context window).
 
+`--ext` takes the extension with or without the leading dot — `md` and `.md`
+are equivalent.
+
 Connection comes from the standard flags/env (`--endpoint-url` /
 `AIMEM_ENDPOINT_URL`, `--access-key` / `AIMEM_ACCESS_KEY`, `--secret-key` /
-`AIMEM_SECRET_KEY`, optional `--session-token`). Output is one matching object
+`AIMEM_SECRET_KEY`, optional `--session-token`; without keys, the rotated
+`AIMEM_CREDENTIALS_FILE`). Output is one matching object
 key per line. With `--content`, each matching line is `name:line[:col]:text`
 (context lines on `name-…` separators). A stderr summary reports
 `N matches in M files / K scanned`, adding `/ skipped`, `/ errors`, and
@@ -41,6 +42,13 @@ key per line. With `--content`, each matching line is `name:line[:col]:text`
 
 Notes:
 
+- **`--prefix` may be a permission boundary, not just a filter.** A credential
+  can be scoped to a prefix (`memory:prefix` on `memory:Search`), and then the
+  prefix you pass is the prefix you are authorized for: omit it, or name one
+  outside your scope, and the request is denied rather than narrowed. If a search
+  returns AccessDenied, pass the prefix your credential covers before concluding
+  the server is misconfigured. A credential with no such condition is unaffected
+  and can search the whole bucket.
 - Search covers workspace objects only; the server excludes the reserved
   `.cortex/`, `.secrets/`, and `.mem/` prefixes and the Tables state files
   (`.warehouse/`, `.namespaces/`, `.maintenance/`, and table data).
