@@ -35,17 +35,18 @@ environment and this skill does not apply.
 These hold for every task on the mount. The references explain each in depth.
 
 - **A write reaches the bucket when `close()` returns success** in the
-  process that opened the file. Until then
-  your bytes are only in a local staged copy, and losing the sandbox loses
-  them. A child writing through a descriptor it inherited gets no such
-  guarantee: its `close()` returns before the upload and cannot report a
-  failed one, so open the file in the process that writes and closes it. `fsync` flushes that local copy to disk but does not upload it: to
-  checkpoint to the bucket, close the file and reopen it.
-  If `close()` fails, assume the upload did not happen: keep your data and
-  rewrite the whole file with the contents you intended, rather than
-  replaying an append that may already have landed. Reading it back through
-  the mount proves nothing, because the mount can still show the bytes it
-  failed to upload.
+  process that opened the file. Until then your bytes are only in a local
+  staged copy, and losing the sandbox loses them. A child writing through a
+  descriptor it inherited gets no such guarantee: its `close()` returns
+  before the upload and cannot report a failed one, so open the file in the
+  process that writes and closes it. `fsync` flushes that local copy to disk
+  but does not upload it: to checkpoint to the bucket, close the file and
+  reopen it. If `close()` fails, assume the upload did not happen: keep your
+  data and rewrite the whole file with the contents you intended, rather
+  than replaying an append that may already have landed. If another process
+  writes the same file, stop it first and include its changes, or your
+  rewrite removes them. Reading it back through the mount proves nothing,
+  because the mount can still show the bytes it failed to upload.
 - **Keep what the next session needs in the instruction file your agent
   loads at startup**, in the directory it opens as its project (often the
   mount root): `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and
