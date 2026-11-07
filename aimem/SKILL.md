@@ -23,7 +23,7 @@ mounted. Locate your AIStor Memory mount(s) yourself:
 
 ```sh
 findmnt -n -o TARGET -S aimem   # AIStor Memory's mount source is "aimem"; prints the mountpoint path
-                                # portable fallback: mount | awk '$1=="aimem"{print $3}'
+                                # portable fallback: mount | sed -n 's/^aimem on \(.*\) type [^ ]* (.*)$/\1/p'
 ```
 
 The path it reports is your workspace root; the reference docs below call it
@@ -34,12 +34,15 @@ environment and this skill does not apply.
 
 These hold for every task on the mount. The references explain each in depth.
 
-- **A write is safe once `close()` or `fsync()` returns.** Until then your
-  bytes are only in a local staged copy, and a sandbox crash loses them. Call
-  `fsync` when you need a checkpoint without closing.
-- **Keep what the next session needs in a memory file at the mount root**
-  (`CLAUDE.md`, `AGENTS.md`, or `MEMORY.md`). Your context window ends with the
-  sandbox; the mount does not. aimem pre-loads these files on the next mount.
+- **A write is safe once `close()` or `fsync()` returns success.** Until then
+  your bytes are only in a local staged copy, and a sandbox crash loses them.
+  If either call fails, the upload did not happen: keep the data and write it
+  again. Call `fsync` when you need a checkpoint without closing.
+- **Keep what the next session needs in the instruction file your agent
+  loads at startup**, at the mount root: `CLAUDE.md` for Claude Code,
+  `AGENTS.md` for Codex, Cursor and most others. Your context window ends with
+  the sandbox; the mount does not. A note in any other file is read only if
+  something tells the next session to read it.
 - **Put throwaway output in `/tmp`, not the mount.** Everything under the mount
   is uploaded to the bucket. Build output and downloaded archives there cost
   upload time and fill the bucket.

@@ -8,11 +8,10 @@ each object as it scans and returns grep-style matches.
 Use this to find relevant memory before you start work, instead of reading files
 one by one. The flags mirror `grep`/`ripgrep`.
 
-`<bucket>` is the bucket your workspace is mounted from. The mount does not show
-it. If aimem runs in your sandbox, its command line does: in
-`ps -o args= -C aimem`, the bucket is the argument just before the mount point
-(for an `s3://bucket/prefix/` argument, the part after `s3://`). Otherwise ask
-whoever launched your sandbox.
+`<bucket>` is the name of the bucket your workspace is mounted from, and the
+mount does not show it: ask whoever launched your sandbox. If your workspace is
+a prefix of that bucket rather than the whole bucket, pass the bucket name alone
+and the prefix with `--prefix`.
 
 ```sh
 # Names only (files with matches, like `rg -l`). All patterns must match (AND);
