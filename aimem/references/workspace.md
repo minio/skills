@@ -24,7 +24,11 @@ This means:
   local staging file only, and anything not yet uploaded is lost if the
   sandbox goes away mid-edit. `fsync(2)` flushes the local copy to disk
   but does not upload it. To checkpoint to the bucket, close the file and
-  reopen it. If `close()` reports an error, assume the upload did not
+  reopen it. Only a `close()` in the process that opened the file
+  uploads and reports the result; a child writing through an inherited
+  descriptor sees its `close()` succeed before the upload, which then
+  runs in the background and cannot report a failure. Open the file in
+  the process that writes and closes it. If `close()` reports an error, assume the upload did not
   happen and rewrite the whole file with the contents you intended. Do
   not replay an append: the upload may have succeeded after all, and the
   append would land twice. If another process writes the same file,
@@ -44,6 +48,9 @@ This means:
   writes are lost without an error. Give each agent its own paths. A
   `flock` shared across mounts does not make this safe: the other mount
   can still be working from the copy of the file it cached earlier.
+  Annotation notes under `.aimem/annot/` are the exception on one mount:
+  each writer has its own buffer and the last close wins, so give each
+  writer its own note name.
 
 ## Rename
 

@@ -34,9 +34,12 @@ environment and this skill does not apply.
 
 These hold for every task on the mount. The references explain each in depth.
 
-- **A write reaches the bucket when `close()` returns success.** Until then
+- **A write reaches the bucket when `close()` returns success** in the
+  process that opened the file. Until then
   your bytes are only in a local staged copy, and losing the sandbox loses
-  them. `fsync` flushes that local copy to disk but does not upload it: to
+  them. A child writing through a descriptor it inherited gets no such
+  guarantee: its `close()` returns before the upload and cannot report a
+  failed one, so open the file in the process that writes and closes it. `fsync` flushes that local copy to disk but does not upload it: to
   checkpoint to the bucket, close the file and reopen it.
   If `close()` fails, assume the upload did not happen: keep your data and
   rewrite the whole file with the contents you intended, rather than
