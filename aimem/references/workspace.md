@@ -36,15 +36,19 @@ This means:
   disk, and the upload holds both sets of writes. Two *mounts* (two
   sandboxes on the same bucket) each stage their own copy, and the
   last upload to complete replaces the object: the other mount's
-  writes are lost without an error. Give each agent its own paths, or
-  coordinate with `flock`, which arbitrates across mounts.
+  writes are lost without an error. Give each agent its own paths. A
+  `flock` shared across mounts does not make this safe: the other mount
+  can still be working from the copy of the file it cached earlier.
 
 ## Rename
 
 `rename(2)` works across the mount, including across directories and
 onto an existing name. aimem uses the server's `RenameObject`, which
 moves the object in one atomic step, so no client ever sees both the
-old and the new name. There is no copy-then-delete fallback: on a
+old and the new name. One exception: when you rename onto a name that
+some process has open, aimem first moves that file aside so its
+readers keep their bytes, and another client can briefly find the
+destination missing. There is no copy-then-delete fallback: on a
 backend without `RenameObject`, `rename(2)` fails rather than leaving
 a half-finished move.
 
@@ -72,7 +76,9 @@ it, survive a remount.
   normally.
 - **Rewriting a file other processes are reading is safe.** A reader
   with the file open is not broken by another process replacing it — no
-  `ESTALE`, no `SIGBUS` in a mapped page. But unlike a local filesystem,
+  `ESTALE`, and no `SIGBUS` in a mapped page unless the new file is
+  shorter: as on any filesystem, touching a mapped page past the new end
+  of file raises `SIGBUS`. But unlike a local filesystem,
   an open descriptor is not pinned to the old contents: every reader of a
   path shares one view of it, so a reader — or a mapped page — may start
   returning the new bytes mid-read. There is no snapshot primitive, and
@@ -86,4 +92,6 @@ it, survive a remount.
 - **Holes / sparse files.** S3 objects are dense byte ranges. Writes
   to offsets past EOF are zero-filled, and `fallocate(2)` beyond EOF
   returns `EOPNOTSUPP` with no fallback. `posix_fallocate(3)` does have
-  one: glibc emulates the allocation by writing zeros.
+  one: glibc emulates the allocation by writing zeros. That emulation
+  fails with `EBADF` on an `O_APPEND` descriptor, and a write made to the
+  same range while it runs can be overwritten with zeros.
