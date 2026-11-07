@@ -27,7 +27,9 @@ This means:
   reopen it. If `close()` reports an error, assume the upload did not
   happen and rewrite the whole file with the contents you intended. Do
   not replay an append: the upload may have succeeded after all, and the
-  append would land twice. Reading the file back through the mount proves
+  append would land twice. If another process writes the same file,
+  stop it first and include its changes in what you write, or your
+  rewrite removes them. Reading the file back through the mount proves
   nothing: the mount can still show the bytes it failed to upload.
 - **The local store needs free space.** If you're going to
   write a 10 GB file, ensure there are 10 GB free locally before

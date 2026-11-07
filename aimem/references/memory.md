@@ -7,7 +7,9 @@ a rule about where to save. Save startup context in the instruction
 file your agent loads from the directory it opens as its project
 (`CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and most
 others). When that project directory is the mount root, the file is
-also warmed.
+also warmed. If the project directory is not on the mount, its
+instruction file is lost with the sandbox: keep the notes on the
+mount, and tell the next session where they are.
 
 Paths are relative to the mount root. The exact set warmed depends on the `--agent` profile the mount was
 started with (claude, codex, cursor, or auto — which warms all of
