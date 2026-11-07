@@ -39,8 +39,10 @@ These hold for every task on the mount. The references explain each in depth.
   them. `fsync` flushes that local copy to disk but does not upload it: to
   checkpoint to the bucket, close the file and reopen it.
   If `close()` fails, assume the upload did not happen: keep your data and
-  write the file again. Reading it back through the mount proves nothing,
-  because the mount can still show the bytes it failed to upload.
+  rewrite the whole file with the contents you intended, rather than
+  replaying an append that may already have landed. Reading it back through
+  the mount proves nothing, because the mount can still show the bytes it
+  failed to upload.
 - **Keep what the next session needs in the instruction file your agent
   loads at startup**, in the directory it opens as its project (often the
   mount root): `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and
