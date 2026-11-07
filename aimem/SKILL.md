@@ -1,6 +1,6 @@
 ---
 name: aimem
-description: Use when working inside an AIStor Memory workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, and how to read object metadata.
+description: Use when working inside an AIStor Memory workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket that outlives the sandbox. Use it whenever `findmnt -S aimem` reports a mount, the working tree has a `.aimem/` directory, or the task mentions AIStor Memory, a Memory Bucket, or keeping agent memory across sessions. Covers locating the mount, when a write is durable, where to keep long-lived agent memory, reading object metadata, annotating objects, and searching the bucket server-side with `aimem search`.
 license: Apache-2.0
 compatibility: Requires a mounted AIStor Memory FUSE workspace; uses findmnt and the aimem CLI.
 metadata:
@@ -36,8 +36,8 @@ Read these (co-located with this file, under `references/`) on demand:
 
 - **`references/navigation.md`** — how to locate your mount and the
   conventional layout of files at its root.
-- **`references/workspace.md`** — POSIX semantics: copy-on-write staging,
-  close/fsync durability, rename, and what doesn't work.
+- **`references/workspace.md`** — POSIX semantics: staged writes,
+  close/fsync durability, shared writers, rename, and what doesn't work.
 - **`references/memory.md`** — where to put long-lived agent context
   (CLAUDE.md, AGENTS.md, MEMORY.md) so it survives sandbox restart.
 - **`references/metadata.md`** — how to read an object's S3 user metadata and
