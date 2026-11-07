@@ -36,8 +36,56 @@ A document uses plain language when its wording, structure, and design enable th
 3. Understandable – Use familiar words, clear sentences, and logical explanations.
 4. Usable – Present information so readers can successfully act on it or make decisions.
 
-This is just a summary of the standard. You should use the full ISO 24495-1 text for complete
-guidance.
+The standard itself is a paid ISO document, so you will usually not have it.
+This page carries what you need to apply it: the principles above, the patterns
+below, and the self-check.
+
+## Why the rule is strict
+
+Readers of technical documentation skim. They arrive from a search result in
+the middle of a task, many read English as a second language, and more of them
+are now agents or translation tools. Each of them stops at the first sentence
+they cannot parse. Plain writing is how a page still works for that reader.
+
+## Patterns that meet the standard
+
+- **Lead with the point.** The first sentence of a page or section says what
+  the reader gets or must do. Background comes after.
+- **One idea per sentence.** Aim for sentences under 25 words. Split a sentence
+  that joins two ideas with "and" or a semicolon.
+- **Name the actor.** Write "aimem uploads the file", not "the file is
+  uploaded". Passive voice hides who does what.
+- **Use verbs, not nouns made from verbs.** Write "configure", not "perform the
+  configuration of".
+- **Talk to the reader.** Use "you". Write each step as an instruction:
+  "Run `make test`."
+- **Put the condition first.** "If the bucket is versioned, run …" lets the
+  reader skip a step that does not apply to them.
+- **Choose the structure that fits the content.** Use a numbered list for steps
+  in order, bullets for items in no order, and a table to compare options.
+- **Write headings that name a task or answer a question.** "Mount a bucket"
+  beats "Overview". A reader who skims the headings should find their place.
+- **Keep one word for one thing.** Define a term on first use, then use the same
+  term every time. Switching between "bucket", "store", and "backend" for one
+  thing reads as three things.
+- **Be concrete.** Give the number, the name, or the command. Cut "simply",
+  "just", "easily", and "various": they tell the reader nothing.
+
+### Before and after
+
+Before:
+
+> In order to facilitate the configuration of the mount, it should be noted
+> that the specification of a local directory is required, which will be
+> utilized for the purposes of staging and caching.
+
+After:
+
+> Pass a local directory with `--local`. aimem stages your writes there and
+> caches reads in it.
+
+The rewrite keeps every fact. It names the flag, says who does what, and drops
+the words that carried no meaning.
 
 ## The process
 
