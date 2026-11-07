@@ -1,7 +1,7 @@
 # Workspace semantics
 
-This mount runs in **workspace mode**: full POSIX writes via
-copy-on-write staging. That means everything you'd expect on a
+This mount runs in **workspace mode**: full POSIX writes through a
+local staged copy of each file. That means everything you'd expect on a
 local filesystem works — random writes, `O_RDWR`, in-place edits,
 seek-then-write, append, rename — but the implementation has a
 small set of consequences worth understanding.
@@ -9,7 +9,7 @@ small set of consequences worth understanding.
 ## What happens on open-for-write
 
 1. aimem copies the current S3 object content into a local staging
-   file, under the local staging directory the mount was configured with.
+   file, in the local store the mount was started with (`--local`).
 2. Your reads and writes operate on that local file directly. They
    are fast, they support arbitrary seeks, and they never round-trip
    to the network.
@@ -26,32 +26,34 @@ This means:
   data safe before you are ready to close the descriptor. Otherwise the
   upload happens on close, and anything not yet committed is lost if the
   sandbox crashes mid-edit.
-- **The staging directory needs free space.** If you're going to
+- **The local store needs free space.** If you're going to
   write a 10 GB file, ensure there are 10 GB free locally before
   opening. aimem warns at mount if free space is below the
   configured threshold.
-- **Concurrent writers fight.** If two processes open the same path
-  for writing, whichever closes last wins, and the other's data is
-  silently overwritten. Close order isn't guaranteed to match open
-  order. This is this mount's staged-upload policy (the last
-  `close()` is what gets uploaded), not a universal POSIX guarantee,
-  and the blast radius is the bucket.
+- **Writers on one mount share the file; writers on different mounts
+  do not.** Two processes on this mount that open the same path for
+  writing both write into one staged copy, as they would on a local
+  disk, and the upload holds both sets of writes. Two *mounts* (two
+  sandboxes on the same bucket) each stage their own copy, and the
+  last upload to complete replaces the object: the other mount's
+  writes are lost without an error. Give each agent its own paths, or
+  coordinate with `flock`, which arbitrates across mounts.
 
 ## Rename
 
-`rename(2)` works across the mount. On buckets that implement
-server-side rename (e.g. S3 Express One Zone, MinIO AIStor)
-aimem uses it directly. On general-purpose S3 buckets it falls
-back to `CopyObject + DeleteObject`. Both paths preserve POSIX
-semantics from inside the mount; external observers reading the
-backing bucket directly may briefly see both source and destination.
+`rename(2)` works across the mount, including across directories and
+onto an existing name. aimem uses the server's `RenameObject`, which
+moves the object in one atomic step, so no client ever sees both the
+old and the new name. There is no copy-then-delete fallback: on a
+backend without `RenameObject`, `rename(2)` fails rather than leaving
+a half-finished move.
 
 ## Unlink, mkdir, rmdir
 
 For real workspace paths, all work as expected. `rmdir` requires the
-directory to be empty, matching POSIX. There is no concept of a
-separate "directory object" in S3, so `mkdir` is essentially free
-until you put something inside it.
+directory to be empty, matching POSIX. `mkdir` stores a zero-byte
+`dir/` marker object, so an empty directory, and the mode you gave
+it, survive a remount.
 
 ## Permissions, timestamps, and mmap
 

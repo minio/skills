@@ -1,6 +1,6 @@
 ---
 name: aimem
-description: Use when working inside an AIStor Memory workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket. Covers how to locate your mount, workspace durability semantics, where to keep agent memory, and how to read object metadata.
+description: Use when working inside an AIStor Memory workspace — an agent-native FUSE filesystem backed by MinIO AIStor, where reads and writes are ordinary POSIX operations against a remote bucket that outlives the sandbox. Use it whenever `findmnt -S aimem` reports a mount, the working tree has a `.aimem/` directory, or the task mentions AIStor Memory, a Memory Bucket, or keeping agent memory across sessions. Covers locating the mount, when a write is durable, where to keep long-lived agent memory, reading object metadata, annotating objects, and searching the bucket server-side with `aimem search`.
 license: Apache-2.0
 compatibility: Requires a mounted AIStor Memory FUSE workspace; uses findmnt and the aimem CLI.
 metadata:
@@ -30,22 +30,40 @@ The path it reports is your workspace root; the reference docs below call it
 `<mount-root>`. If nothing is reported, no AIStor Memory mount is present in this
 environment and this skill does not apply.
 
-## Reference docs
+## Working rules
 
-Read these (co-located with this file, under `references/`) on demand:
+These hold for every task on the mount. The references explain each in depth.
 
-- **`references/navigation.md`** — how to locate your mount and the
-  conventional layout of files at its root.
-- **`references/workspace.md`** — POSIX semantics: copy-on-write staging,
-  close/fsync durability, rename, and what doesn't work.
-- **`references/memory.md`** — where to put long-lived agent context
-  (CLAUDE.md, AGENTS.md, MEMORY.md) so it survives sandbox restart.
-- **`references/metadata.md`** — how to read an object's S3 user metadata and
-  tags as xattrs, pre-warmed by `ls`.
-- **`references/annotations.md`** — how to attach durable, named notes to any
-  object (read before you edit, write after you reason) via
-  `.aimem/annot/<path>/@<name>`. They may be switched off on the server; a
-  note write then fails with "Operation not supported". Do not retry it; keep
-  what you need in a memory file instead.
-- **`references/search.md`** — how to grep the whole cortex server-side with
-  `aimem search` (regex over compressed+encrypted data at rest).
+- **A write is safe once `close()` or `fsync()` returns.** Until then your
+  bytes are only in a local staged copy, and a sandbox crash loses them. Call
+  `fsync` when you need a checkpoint without closing.
+- **Keep what the next session needs in a memory file at the mount root**
+  (`CLAUDE.md`, `AGENTS.md`, or `MEMORY.md`). Your context window ends with the
+  sandbox; the mount does not. aimem pre-loads these files on the next mount.
+- **Put throwaway output in `/tmp`, not the mount.** Everything under the mount
+  is uploaded to the bucket. Build output and downloaded archives there cost
+  upload time and fill the bucket.
+- **Work through the mount, not around it.** Writing the bucket directly (for
+  example with `aws s3 cp`) bypasses the mount, which then keeps serving stale
+  bytes and can overwrite your change on its next upload.
+- **Keep secrets out of files.** Credentials reach the sandbox as environment
+  variables. A key written to the mount is stored in the bucket for every
+  later agent to read.
+
+## Which reference to read
+
+The references sit next to this file, under `references/`. Read one when the
+task calls for it:
+
+| When you need to…                                                                                          | Read                        |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Find what is at the mount root, or the mount itself                                                        | `references/navigation.md`  |
+| Know whether a write, rename, chmod or mmap behaves as on local disk, or share a file with another process | `references/workspace.md`   |
+| Decide where to save notes, plans or context for a later session                                           | `references/memory.md`      |
+| Read an object's S3 metadata or tags                                                                       | `references/metadata.md`    |
+| Leave or read notes on a specific file for other agents                                                    | `references/annotations.md` |
+| Find which files mention something, without reading them all                                               | `references/search.md`      |
+
+Annotations are a tech preview and may be off on the server. If a note write
+fails with "Operation not supported", don't retry it; keep the note in a memory
+file instead.

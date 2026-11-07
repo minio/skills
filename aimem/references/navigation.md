@@ -45,10 +45,6 @@ reflection under `user.s3.meta.*` / `user.s3.tags.*` xattrs, pre-warmed by
 ## What you should NOT do
 
 - Do not bypass the mount to write directly to the backing bucket (e.g. via
-  `aws s3 cp` from inside the sandbox) — concurrent S3 writes would race with
-  aimem's copy-on-write staging and may produce inconsistent state.
-- Do not assume `os.rename()` is atomic across directories: on
-  general-purpose buckets, aimem implements rename via
-  `CopyObject + DeleteObject`, which is two HTTP requests. POSIX semantics
-  still hold within the mount, but observers reading the underlying bucket
-  directly may see both copies briefly.
+  `aws s3 cp` from inside the sandbox). The mount does not see writes made
+  behind it, so a file you have open, or one the mount has cached, can go
+  on showing the old bytes, and its next upload overwrites yours.

@@ -6,18 +6,18 @@ sandbox is fast. Write your project context to one of these
 conventional paths. Other agents on this mount can then read it
 without you pointing them at it.
 
-The exact set warmed depends on the `--agent` profile the mount was
+Paths are relative to the mount root. The exact set warmed depends on the `--agent` profile the mount was
 started with (claude, codex, cursor, or auto — which warms all of
 them). The per-vendor conventions below list the files each profile
 recognises.
 
 ## Per-vendor conventions
 
-| Vendor / family | Files                                     |
-| --------------- | ------------------------------------------ |
-| Claude Code     | `CLAUDE.md` (root or per-dir), `.claude/`  |
-| Codex / generic | `AGENTS.md`, `.agents/`, `MEMORY.md`       |
-| Cursor          | `.cursorrules`, `.cursor/`, `AGENTS.md`    |
+| Vendor / family | Files                                   |
+| --------------- | --------------------------------------- |
+| Claude Code     | `CLAUDE.md`, `.claude/`                 |
+| Codex / generic | `AGENTS.md`, `.agents/`, `MEMORY.md`    |
+| Cursor          | `.cursorrules`, `.cursor/`, `AGENTS.md` |
 
 If you write to one of these paths, the next agent that mounts this
 bucket will see it warmed automatically. If you invent a new path,
@@ -41,6 +41,6 @@ about it.
   provisioned into the sandbox out-of-band (e.g. as environment variables),
   not stored on the mount.
 - **One-shot scratch.** Anything you only need until the current
-  command finishes. Use `/tmp` or the staging dir, not the mount.
+  command finishes. Use `/tmp`, not the mount.
 - **Generated artifacts you can rebuild from source.** They cost
   upload bandwidth and clutter the bucket.
