@@ -87,6 +87,9 @@ echo 'auth() has no rate limiting; see ticket AUTH-42' \
 Write notes with `tee` (or `cp`), not a shell redirection. A note is saved
 when the file closes, and `>` and `>>` do not report an error raised there,
 so a failed write would look like it succeeded.
+BusyBox `tee` (Alpine) has the same gap: it never checks the close. There,
+write the note to a file in `/tmp` and `cp` it into place, since `cp` does
+report the error.
 
 A write replaces the whole note; truncating it to empty (`: >`) deletes
 it. All of this is plain POSIX — use `open`/`read`/`write` from any
