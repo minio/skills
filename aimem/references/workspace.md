@@ -25,10 +25,15 @@ This means:
   sandbox goes away mid-edit. `fsync(2)` flushes the local copy to disk
   but does not upload it. To checkpoint to the bucket, close the file and
   reopen it. Only a `close()` in the process that opened the file
-  uploads and reports the result; a child writing through an inherited
-  descriptor sees its `close()` succeed before the upload, which then
-  runs in the background and cannot report a failure. Open the file in
-  the process that writes and closes it. If `close()` reports an error, assume the upload did not
+  uploads and reports the result. A child's `close()` of a descriptor
+  it inherited uploads nothing: the opener's later `close()` uploads the
+  child's writes, and if the opener closed first, the upload runs in the
+  background after the last descriptor closes and cannot report a
+  failure. Open the file in the process that writes and closes it.
+  One exception to the `fsync` rule: on an instruction file that carries
+  the aimem preamble (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`), `fsync`
+  uploads what you have written so far, so an interrupted rewrite can
+  leave a partial file in the bucket. If `close()` reports an error, assume the upload did not
   happen and rewrite the whole file with the contents you intended. Do
   not replay an append: the upload may have succeeded after all, and the
   append would land twice. If another process writes the same file,

@@ -93,9 +93,10 @@ There, write the note as usual and then read it back with `cat` to confirm
 it saved.
 
 A write replaces the whole note; truncating it to empty (`: >`) deletes
-it. Two writers to the same note do not merge: the last one to close
-replaces the other's text, even though both closes succeed. Give each
-agent its own note name, such as `@review-<agent>`. All of this is plain POSIX — use `open`/`read`/`write` from any
+it. Two writers to the same note do not merge, and either one's text can
+end up in the note even after both closes succeed: a delayed release can
+write an earlier buffer again. Give each agent its own note name, such
+as `@review-<agent>`. All of this is plain POSIX — use `open`/`read`/`write` from any
 language, no S3 API calls.
 
 ## You must know the object first — the namespace is not browsable
