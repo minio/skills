@@ -24,9 +24,9 @@ This means:
   local staging file only, and anything not yet uploaded is lost if the
   sandbox goes away mid-edit. `fsync(2)` flushes the local copy to disk
   but does not upload it. To checkpoint to the bucket, close the file and
-  reopen it. If `close()` reports an
-  error, the upload may still have happened: read the file back before
-  you write it again.
+  reopen it. If `close()` reports an error, assume the upload did not
+  happen and write the file again. Reading it back through the mount
+  proves nothing: the mount can still show the bytes it failed to upload.
 - **The local store needs free space.** If you're going to
   write a 10 GB file, ensure there are 10 GB free locally before
   opening. aimem warns at mount if free space is below the

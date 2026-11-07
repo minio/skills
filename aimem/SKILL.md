@@ -38,13 +38,16 @@ These hold for every task on the mount. The references explain each in depth.
   your bytes are only in a local staged copy, and losing the sandbox loses
   them. `fsync` flushes that local copy to disk but does not upload it: to
   checkpoint to the bucket, close the file and reopen it.
-  If `close()` fails, the upload may or may not have happened. Keep your data,
-  read the file back, and write it again only if your change is missing.
+  If `close()` fails, assume the upload did not happen: keep your data and
+  write the file again. Reading it back through the mount proves nothing,
+  because the mount can still show the bytes it failed to upload.
 - **Keep what the next session needs in the instruction file your agent
   loads at startup**, in the directory it opens as its project (often the
   mount root): `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, Cursor and
-  most others. Your context window ends with
-  the sandbox; the mount does not. A note in any other file is read only if
+  most others. Your context window ends with the sandbox; the mount does not.
+  If that project directory is not on the mount, its instruction file is lost
+  with the sandbox: keep the notes on the mount, and tell whoever starts the
+  next session where they are. A note in any other file is read only if
   something tells the next session to read it.
 - **Put throwaway output in `/tmp`, not the mount.** Everything under the mount
   is uploaded to the bucket. Build output and downloaded archives there cost
