@@ -41,7 +41,8 @@ These hold for every task on the mount. The references explain each in depth.
   before the upload and cannot report a failed one, so open the file in the
   process that writes and closes it. `fsync` flushes that local copy to disk
   but does not upload it: to checkpoint to the bucket, close the file and
-  reopen it. If `close()` fails, assume the upload did not happen: keep your
+  reopen it. (On an instruction file that carries the aimem preamble,
+  `fsync` does upload what you have written so far.) If `close()` fails, assume the upload did not happen: keep your
   data and rewrite the whole file with the contents you intended, rather
   than replaying an append that may already have landed. If another process
   writes the same file, stop it first and include its changes, or your
