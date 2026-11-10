@@ -105,7 +105,12 @@ git log --oneline @{upstream}..HEAD 2>/dev/null
 
 ### Step 3: Resolve the pull request
 
-Run the preamble above. If `pr_number` is empty or `null`, there is no open pull request. Ask whether to
+When the user names pull request numbers, work on those, one at a time, and
+set `pr_number` to each in turn instead of deriving it from the branch:
+`gh pr view <number> --json headRefName,state` tells you the branch, which
+must be checked out (or have a worktree) before Step 10 edits code.
+
+Otherwise run the preamble above. If `pr_number` is empty or `null`, there is no open pull request. Ask whether to
 create one. If the user agrees:
 
 ```bash
@@ -145,6 +150,11 @@ sections.
 For other review bots, read the review body yourself and pull out any concrete
 finding it names. Most bots put everything inline and use the body only for a
 summary, so expect little here.
+
+Read every human review body in full as well. A reviewer who finds problems
+outside the diff writes them there, and they never appear as threads (see
+"Do not skip human review bodies" in `references/triage.md`). An unresolved
+thread count of zero says nothing about them.
 
 ### Step 8: Remove duplicates and triage
 

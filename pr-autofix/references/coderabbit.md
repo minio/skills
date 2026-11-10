@@ -84,6 +84,44 @@ static IDs. Multiple datetime fields therefore create duplicate DOM IDs.
 <!-- cr-comment:v1:b41c28ff5768a73363ed5b23 -->
 ```
 
+### The card layout
+
+Since late 2026 CodeRabbit writes outside-diff findings differently. The
+section heading is a bold line inside the callout, not a `<summary>`:
+
+```
+**⚠️ Outside diff range comments (2)**
+```
+
+Each finding is one `<details>` card. Its summary holds the severity, a title
+that may be cut short, and the short file name with the lines. The full path,
+the meta line and the full title follow inside the card:
+
+```
+<details>
+<summary><strong>[icon] Major</strong> · Retire only the finished record. · <code>resume.go:121-150</code></summary><blockquote>
+<dl><dd><br>
+
+`internal/service/resume.go:121-150`
+**[icon] Major** · **Data Integrity & Integration** · **Heavy lift**
+
+**Retire only the finished record.**
+
+The old pipeline can delete the record a newer publish wrote.
+
+<details>
+<summary>[icon] Prompt for AI Agents</summary>
+...
+</details>
+
+<!-- cr-comment:v1:HASH -->
+</dd></dl>
+</blockquote></details>
+```
+
+The icons are `<picture>` and `<img>` tags, so match summary text after
+stripping tags. The script reads both layouts and emits the same fields.
+
 Variations to expect:
 
 - In failed-to-post sections the backticks are absent: `4-4: _🎯 …_ | _🟠 Major_`.
@@ -110,6 +148,11 @@ python3 "$skill/scripts/cr-sections.py" < "$work/comments.json" >> "$work/cr-bod
 
 Read `comments.json` too: on some pull requests CodeRabbit posts its walkthrough
 as a plain comment rather than a review.
+
+If the script prints nothing for a body that has an "outside the diff" banner,
+CodeRabbit has changed its layout again: read the body by hand, then add the
+new layout to the script and to `scripts/test_cr_sections.py`
+(`python3 scripts/test_cr_sections.py`).
 
 Each output line is one finding:
 
