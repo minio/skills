@@ -88,7 +88,7 @@ Report a performance concern as a question unless you measured it.
 
 ## 9. What not to report
 
-- Formatting, import order, or anything the repository's linter enforces.
+- Formatting, import order, or other style rules the repository's linter enforces. Real bugs still count, even when a linter could catch them.
 - Naming or structure you would have chosen differently, when the code is clear.
 - Problems in code the pull request did not change, unless the change makes
   them worse. Mention those at most once, under "Outside this change".

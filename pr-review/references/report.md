@@ -35,6 +35,8 @@ Write for a person, not a log:
 - <file:line> — <something you could not settle>
 
 **Not reviewed:** <skipped files, tests not run, or "nothing">
+
+**Reviewed commit:** <headRefOid from Step 2>
 ```
 
 Leave out any section that has nothing in it. Mark each finding that is
@@ -62,6 +64,8 @@ Leave out any section that has nothing in it. Mark each finding that is
 - internal/policy/cache.go:30 — is the cache shared across server instances? If so, invalidation on update is also needed.
 
 **Not reviewed:** the generated mocks in `internal/policy/mocks/`.
+
+**Reviewed commit:** 3f9c2e1
 ```
 
 ## Inline comments
@@ -72,7 +76,7 @@ finding, on a line the diff changed (GitHub rejects others). Write a review
 file and post it in one call so the author gets one notification:
 
 ```bash
-cat > "${TMPDIR:-/tmp}/pr-review.json" <<'EOF'
+cat > "$work/review.json" <<'EOF'
 {
   "commit_id": "<headRefOid from Step 2>",
   "event": "COMMENT",
@@ -83,7 +87,8 @@ cat > "${TMPDIR:-/tmp}/pr-review.json" <<'EOF'
   ]
 }
 EOF
-gh api "repos/{owner}/{repo}/pulls/<number>/reviews" --input "${TMPDIR:-/tmp}/pr-review.json"
+pr_api=$(gh pr view "$pr" --json url --jq '.url | sub("^https://github.com/"; "repos/") | sub("/pull/"; "/pulls/")')
+gh api "$pr_api/reviews" --input "$work/review.json"
 ```
 
 Use `"event": "COMMENT"` unless the user explicitly asks you to approve or
