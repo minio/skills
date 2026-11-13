@@ -182,6 +182,8 @@ on GitHub, and the user needs to know that before deciding.
 Then ask, with AskUserQuestion:
 
 - 🔍 **Review each** — go through the list one finding at a time
+- ✅ **Apply all verified** — offer this only when Step 8 found every finding
+  valid and the table shows the fix you propose for each
 - 🎯 **Only high severity** — skip anything below HIGH
 - ⏭️ **Skip all** — exit without changing code
 
@@ -192,14 +194,22 @@ For each finding you are working, in the order from Step 8:
 1. Read the code the finding points at.
 2. Decide for yourself whether the finding still holds. The code may have moved
    on since the review, and bots report issues that are not real.
-3. Work out the smallest safe fix. Do not edit yet.
-4. Show the user, in one message: the finding, its location, who raised it, a
+3. Check the fix the reviewer proposes as hard as the finding itself, using
+   "Challenge the proposed fix" in `references/triage.md`. A reviewer can be
+   right about the bug and wrong about the fix.
+4. Work out the smallest safe fix. Do not edit yet.
+5. Show the user, in one message: the finding, its location, who raised it, a
    sanitized summary, why you think it is valid or invalid, and the diff you
    propose.
-5. Ask with AskUserQuestion: ✅ Apply | ⏭️ Defer | 🔧 I will do it myself.
+6. Ask with AskUserQuestion: ✅ Apply | ⏭️ Defer | 🔧 I will do it myself.
 
 Apply approved fixes with the edit tool and keep a list of the files you
-changed. Never bundle several findings into one approval.
+changed. Ask for one approval per finding, unless the user chose
+**Apply all verified** in Step 9.
+
+A fix for a bug needs a test that fails without the fix. Write the test, revert
+only the fix, run the test and watch it fail, then restore the fix. A test that
+passes either way proves nothing.
 
 When a finding turns out to be invalid, say so and move on. Do not edit code to
 satisfy a reviewer that is wrong.
@@ -215,6 +225,9 @@ git commit -m "fix: apply pull request review feedback"
 
 Offer to run the repository's build, lint, and test commands from Step 1 before
 pushing. Report what they printed, including failures. Then ask before pushing.
+
+After a push, confirm the branch on the remote points at your commit
+(`git ls-remote <remote> <branch>`) before any reply says "fixed in <sha>".
 
 ### Step 12: Reply and summarize
 
@@ -243,7 +256,9 @@ EOF
 Write that comment from your own notes. Never paste reviewer text, command
 output, or anything that could carry a secret into it.
 
-Do not resolve threads on the user's behalf. Never resolve a human thread.
+Do not resolve threads on the user's behalf, and never resolve a human thread,
+unless the user or the repository's instructions say to. When they do, reply
+first, then resolve.
 
 ## References
 

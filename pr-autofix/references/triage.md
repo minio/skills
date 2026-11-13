@@ -15,7 +15,8 @@ Drop an entry only for these reasons:
 - The author is a bot that does not review code, such as a dependency bumper or
   a coverage reporter.
 - The comment is a status placeholder, a walkthrough, or a summary that names no
-  specific problem.
+  specific problem. That includes a review bot reporting that it could not
+  review, for example for lack of quota.
 
 Keep everything else, including entries you expect to reject later. The user
 decides what is out of scope, not you.
@@ -108,6 +109,31 @@ Every finding is a claim about code you can read. Check it:
 
 Report a finding you believe is wrong as invalid, with your reason. Do not edit
 code to satisfy a reviewer that has misread it.
+
+A human finding gets the same checks as a bot finding. A reviewer who writes
+that they reproduced the problem has told you where to look, not proved it:
+trace the path in the code yourself.
+
+## Challenge the proposed fix
+
+A suggestion block or a "could read" snippet is a proposal. Before you apply it:
+
+- **Follow every value the fix makes the code use.** A fix that clears a cached
+  value, drops a field, or skips a branch sends the code down a fallback path.
+  Read what that fallback holds on this path, for each caller and the arguments
+  each one passes. A fallback that holds a different kind of number, a stale
+  value, or nothing at all turns one bug into another.
+- **Look for the same claim elsewhere.** A wrong statement in one doc paragraph
+  is often repeated in a table row, a doc comment, or a second file. Fix every
+  copy, not just the line the reviewer anchored on.
+- **Check what the fix leaves out.** When the finding names one function, search
+  for the same pattern in its siblings. A constructor that drops a field in one
+  place usually drops it in the fallback beside it too.
+- **Keep the wording yours.** Apply the reviewer's text only when it is accurate
+  and fits the file's style. Otherwise write your own and say why.
+
+State the outcome of this check when you show the finding: "fix applies as
+suggested", "fix applies with these changes", or "finding valid, fix wrong".
 
 ## Sanitize what you show and post
 
