@@ -94,6 +94,37 @@ the diff and say that the description is missing. Every finding is judged
 against this intent: code that does something else than the author meant is a
 bug even if it runs.
 
+### Step 3b: Check the premise before the code
+
+Do this for a pull request that fixes behaviour. A feature or a cleanup has no
+bug premise to check; skip to Step 4.
+
+A fix is only as good as the problem it claims to solve. Pull requests, and
+the issues behind them, often describe a bug larger than the one that exists:
+a trigger that only a test can set, an impact nobody traced, or a security
+label on something the caller could already do. A review that starts with the
+code accepts that framing and then polishes a fix for the wrong problem. Read
+every issue the pull request links (`gh issue view`), then check the claim
+against the base branch with `references/checklist.md`, section "0. Premise":
+
+1. **Can it happen?** Trace how a running system reaches the trigger through
+   its public interface or normal operation, and with which permissions.
+2. **Is it new?** Look for the same fix on the base branch and in other open
+   pull requests, and check that every cited `file:line` exists on the base
+   branch.
+3. **Is the impact right?** Compare the words and labels (data loss, security,
+   breaking change) with what the trace shows.
+4. **Is there proof?** A test that fails without the fix through the public
+   behaviour, or a linked report from a real system. Your own complete trace
+   shows the bug can happen; the fix still needs the test.
+5. **Is the fix in proportion?** Name the smallest change that would close the
+   reported case, and check that this fix closes it.
+
+When the premise fails, that is the first finding, with the evidence, and the
+ask is a correction or proof before anything else. If the premise fails
+outright (the trigger cannot happen), review the code only as far as needed to
+show that.
+
 ### Step 4: Read the change and look for problems
 
 Work through the diff hunk by hunk. For each change, read enough surrounding
@@ -101,7 +132,8 @@ code in `$work/head` to know what calls it and what it relies on. Use
 `references/checklist.md` for what to look for, most serious first. Spend your
 attention on:
 
-1. Wrong results, crashes, and data loss or corruption
+1. Wrong results, crashes, and data loss or corruption, judged against the
+   premise you checked in Step 3b
 2. Security: authentication, authorisation, input handling, secrets
 3. Concurrency: races, deadlocks, leaked goroutines or threads
 4. Error handling: ignored errors, wrong error returned, partial failure
@@ -143,7 +175,10 @@ Give each finding a confidence:
 ### Step 6: Write the review
 
 Write it the way a thoughtful colleague would talk to the author: plain words,
-short sentences, no jargon the author would not use, and no tone of blame. If
+short sentences, no jargon the author would not use, and no tone of blame. This
+matters most when the premise is wrong: state what the code shows and what
+evidence would change your mind, and leave out judgements of the author or of
+how the pull request was written. If
 the `docs` skill is installed, follow its plain-language rules for the wording.
 The author should understand each point on the first read and know what to do
 about it.
@@ -151,7 +186,8 @@ about it.
 Use the format in `references/report.md`. In short:
 
 - Start with a verdict in one line: **Ready to merge**, **Merge after fixes**,
-  or **Needs rework**, and the one reason that decides it.
+  **Needs rework**, or **Premise not shown**, and the one reason that decides
+  it.
 - List findings by severity: **Blocker**, **Should fix**, **Nit**. Give at most
   three nits. If you have more, the review is about style, not the change.
 - Each finding: `file:line`, what goes wrong and when, the evidence (the trace
