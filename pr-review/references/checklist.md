@@ -63,6 +63,14 @@ code that acts on the claim.
 - Changed defaults: what happens to callers that relied on the old value?
 - Copied code: was every name changed in the copy, or does one still point at
   the original?
+- Rebuilt values: when code builds a new struct or record from an old one,
+  does it carry over every field the readers need? Check each place it is
+  rebuilt, including fallbacks.
+- Derived state: when the change stores a count, flag, or summary next to the
+  data it describes, does every path that later rewrites that data also clear or
+  recompute it?
+- Stated invariants: when a comment or doc says a value is "never" or "always"
+  something, check every branch that computes it, including the rare ones.
 
 ## 2. Data safety
 
@@ -121,6 +129,8 @@ Report a performance concern as a question unless you measured it.
 - Does a bug fix include a test that reproduces the bug?
 - Do the tests check results, or only that the code did not crash?
 - Did the change delete or weaken an existing test? Why?
+- Docs and doc comments: does the change make an existing description of the
+  behaviour wrong?
 
 ## 9. What not to report
 
