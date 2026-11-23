@@ -15,9 +15,11 @@ Write for a person, not a log:
 ## Template
 
 ```markdown
-**Verdict:** <Ready to merge | Merge after fixes | Needs rework> — <the one reason that decides it>
+**Verdict:** <Ready to merge | Merge after fixes | Needs rework | Premise not shown> — <the one reason that decides it>
 
 **What this changes:** <one or two sentences of intent, from Step 3>
+
+**Premise:** <holds | does not hold: the trigger, impact or proof that is missing, with file:line>
 
 ### Blockers
 1. **<file:line> — <what goes wrong, in a few words>**

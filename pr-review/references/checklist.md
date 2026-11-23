@@ -6,6 +6,7 @@ ask the ones the diff makes relevant.
 
 ## Contents
 
+0. Premise
 1. Correctness
 2. Data safety
 3. Security
@@ -15,6 +16,38 @@ ask the ones the diff makes relevant.
 7. Performance
 8. Tests
 9. What not to report
+
+## 0. Premise
+
+Check what the pull request and its linked issues claim before you check the
+code that acts on the claim.
+
+- **Reachable.** Which public call, command or normal background operation
+  leads to the trigger, and with which permissions? A trigger is not reachable
+  when only tests set it, when the reproduction calls an internal function
+  directly, skips a lock the public path takes, injects a hook, edits stored
+  data by hand, or needs several unrelated faults at the same time. Point at
+  the line that allows or blocks it.
+- **Known limits.** Does the repository document the case as unsupported or
+  undefined? Then it is not a bug.
+- **Already fixed.** Is the same fix on the base branch, in a merged pull
+  request, or in another open one? Does an existing helper or a dependency
+  already enforce the check the pull request adds? Does every `file:line` the description cites
+  exist on the base branch, not only on this branch?
+- **Impact.** Do the words and labels match the trace? "Data loss",
+  "corruption", "takeover" and "escalation" need a path to that result. A
+  change is a security fix only when a caller gains something their
+  credentials did not already allow. An unreleased feature has no released
+  users whose setups a change could break.
+- **Proof.** Is there a test that fails without the fix, driven through the
+  public behaviour, or a report from a real system with its version and logs?
+  A test that hand-builds the bad state can guard against a regression, but it
+  does not show the bug can happen.
+- **Proportion.** What is the smallest change that closes the reported case,
+  and does this one close it? Ask why each new goroutine, retry loop, lock,
+  cache, configuration option, wire or storage field and new dependency is
+  needed when an existing mechanism could serve, and what it costs per
+  request. Unrelated changes belong in their own pull request.
 
 ## 1. Correctness
 
@@ -92,4 +125,6 @@ Report a performance concern as a question unless you measured it.
 - Naming or structure you would have chosen differently, when the code is clear.
 - Problems in code the pull request did not change, unless the change makes
   them worse. Mention those at most once, under "Outside this change".
-- Hypothetical problems you cannot connect to a real input or call path.
+- Hypothetical problems you cannot connect to a real input or call path. Hold
+  the pull request to the same standard: a fix for a problem nobody can
+  trigger is itself a finding.

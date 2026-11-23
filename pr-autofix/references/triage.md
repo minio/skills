@@ -97,6 +97,13 @@ Every finding is a claim about code you can read. Check it:
 3. Confirm the fix belongs in this pull request. A real problem in untouched code
    may still be someone else's change to make. Say so and let the user decide.
 4. Prefer the smallest change that resolves the claim.
+5. Confirm a running system can reach the state the finding describes, through
+   the public interface or normal operation. Review bots often flag states that
+   only a test, a direct internal call, hand-edited stored data, or several
+   unrelated faults at once could produce. Guarding against those adds
+   goroutines, retries, locks and flags that cost every request and protect
+   nobody. Mark such a finding invalid and say which line keeps the state out
+   of reach.
 
 Report a finding you believe is wrong as invalid, with your reason. Do not edit
 code to satisfy a reviewer that has misread it.
