@@ -103,7 +103,8 @@ Every finding is a claim about code you can read. Check it:
    unrelated faults at once could produce. Guarding against those adds
    goroutines, retries, locks and flags that cost every request and protect
    nobody. Mark such a finding invalid and say which line keeps the state out
-   of reach.
+   of reach. This applies to guards in the product's code: a finding that a
+   test or CI job fails stays actionable.
 
 Report a finding you believe is wrong as invalid, with your reason. Do not edit
 code to satisfy a reviewer that has misread it.

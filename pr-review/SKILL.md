@@ -96,6 +96,9 @@ bug even if it runs.
 
 ### Step 3b: Check the premise before the code
 
+Do this for a pull request that fixes behaviour. A feature or a cleanup has no
+bug premise to check; skip to Step 4.
+
 A fix is only as good as the problem it claims to solve. Pull requests, and
 the issues behind them, often describe a bug larger than the one that exists:
 a trigger that only a test can set, an impact nobody traced, or a security
@@ -112,7 +115,8 @@ against the base branch with `references/checklist.md`, section "0. Premise":
 3. **Is the impact right?** Compare the words and labels (data loss, security,
    breaking change) with what the trace shows.
 4. **Is there proof?** A test that fails without the fix through the public
-   behaviour, or a linked report from a real system.
+   behaviour, or a linked report from a real system. Your own complete trace
+   shows the bug can happen; the fix still needs the test.
 5. **Is the fix in proportion?** Name the smallest change that would close the
    reported case, and check that this fix closes it.
 

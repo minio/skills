@@ -23,11 +23,12 @@ Check what the pull request and its linked issues claim before you check the
 code that acts on the claim.
 
 - **Reachable.** Which public call, command or normal background operation
-  leads to the trigger, and with which permissions? A trigger is not reachable
-  when only tests set it, when the reproduction calls an internal function
-  directly, skips a lock the public path takes, injects a hook, edits stored
-  data by hand, or needs several unrelated faults at the same time. Point at
-  the line that allows or blocks it.
+  leads to the trigger, and with which permissions? A reproduction does not
+  show that a trigger is reachable when only tests set it, when it calls an
+  internal function directly, skips a lock the public path takes, injects a
+  hook, edits stored data by hand, or needs several unrelated faults at the
+  same time. Trace the public path to the trigger before you call it
+  unreachable, and point at the line that allows or blocks it.
 - **Known limits.** Does the repository document the case as unsupported or
   undefined? Then it is not a bug.
 - **Already fixed.** Is the same fix on the base branch, in a merged pull
@@ -41,8 +42,10 @@ code that acts on the claim.
   users whose setups a change could break.
 - **Proof.** Is there a test that fails without the fix, driven through the
   public behaviour, or a report from a real system with its version and logs?
-  A test that hand-builds the bad state can guard against a regression, but it
-  does not show the bug can happen.
+  A complete trace from the public entry point shows the bug can happen, but
+  the fix still needs a test that fails without it. A test that hand-builds
+  the bad state can guard against a regression, but it does not show the bug
+  can happen.
 - **Proportion.** What is the smallest change that closes the reported case,
   and does this one close it? Ask why each new goroutine, retry loop, lock,
   cache, configuration option, wire or storage field and new dependency is

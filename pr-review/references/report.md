@@ -19,7 +19,7 @@ Write for a person, not a log:
 
 **What this changes:** <one or two sentences of intent, from Step 3>
 
-**Premise:** <holds | does not hold: the trigger, impact or proof that is missing, with file:line>
+**Premise:** <holds | not shown: the trace or proof that is missing | does not hold: the line that rules it out | not applicable (not a fix)>
 
 ### Blockers
 1. **<file:line> — <what goes wrong, in a few words>**
