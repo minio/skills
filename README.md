@@ -57,6 +57,35 @@ example the OpenAI Agents SDK or other managed-agent harnesses, where the model
 lives in a control plane and an in-sandbox install is invisible to it. Add the
 skill host-side, alongside your own skills, before the run starts.
 
+## Updating
+
+Skills change as review bots and tools change. To get the latest version of a
+skill you installed with the `skills` CLI:
+
+```bash
+# see which installed skills have updates
+npx skills check
+
+# update one skill, or every installed skill
+npx skills update pr-autofix
+npx skills update
+```
+
+`npx skills update` asks whether to update global or project skills. Add `-g`
+for global skills only, `-p` for project skills only, or `-y` to skip the
+question.
+
+If you copied a skill folder by hand, copy it again from a fresh clone:
+
+```bash
+git clone https://github.com/minio/skills.git   # or: git -C skills pull
+rm -rf ~/.claude/skills/pr-autofix
+cp -r skills/pr-autofix ~/.claude/skills/pr-autofix
+```
+
+If your agent is already running, start a new session so it loads the new
+version.
+
 ## Contributing a skill
 
 Each top-level directory is one skill and must contain a spec-compliant
