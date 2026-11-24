@@ -248,7 +248,10 @@ in_flight=$(jq -n \
    | from_entries) as $posted
   | [$comments[][]]
   | map(select(.user.type == "Bot")
-        | select((.body // "") | test("come back again in a few minutes|is reviewing|is working|review in progress|review queued"; "i"))
+        | select(
+            ((.body // "") | test("come back again in a few minutes|is reviewing|review in progress|review queued"; "i"))
+            or ((.user.login | test("^claude"; "i"))
+                and ((.body // "") | test("Claude( Code)? is working"; "i"))))
         | select(.updated_at > ($posted[.user.login] // "")))
   | length')
 ```
@@ -260,8 +263,9 @@ array per page. Indexing `[0]` would silently see only the first page.
 
 Claude edits one comment in place: it reads "Claude Code is working…" while
 the review runs and "Claude finished …" once it is done. Its review bodies are
-often empty, so `$posted` has no entry for it, and any comment still saying
-"working" counts as in flight.
+often empty, so `$posted` has no entry for it, and its comment counts as in
+flight while it still says "working". The match is limited to Claude's own
+comments: another bot's finding can contain "is working" in ordinary prose.
 
 This also catches the case that matters most: a reviewer that already reviewed an
 earlier commit and is now re-reviewing the one you just pushed. Its old findings
