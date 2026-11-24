@@ -42,6 +42,8 @@ confirmed on live pull requests:
 | Reviewer | Logins seen | Severity marker | Notes |
 | --- | --- | --- | --- |
 | CodeRabbit | `coderabbitai`, `coderabbitai[bot]` | `_🎯 Category_ \| _🟠 Major_ \| _⚡ Quick win_` on its own line | Bold title, then the argument. Ends with `<!-- cr-comment:v1:HASH -->`. Keeps some findings out of the diff — see `coderabbit.md`. |
+| Claude | `claude`, `claude[bot]` | none fixed: each repository's prompt sets the format. Read words such as `CRITICAL` or `MEDIUM:` when present; otherwise judge the claim as for Copilot | Review body is often empty. Findings go in a pull request comment that starts "Claude finished …", and many are repeated as inline threads. The same comment reads "Claude Code is working…" while the review runs. |
+| Codex | `chatgpt-codex-connector`, `chatgpt-codex-connector[bot]` | an image badge in the bold title: `![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)` | Read the badge text (`P0` to `P3`) for severity. Each inline finding ends with `<!-- codex-code-review-finding:v1 -->`. The review body ("💡 Codex Review", `codex-review-receipt`) and the "Codex Review Summary" comment hold status only, never findings. |
 | GitHub Copilot | `copilot-pull-request-reviewer`, `copilot-pull-request-reviewer[bot]`, `Copilot` | none | Plain prose, no severity at all. Often ends in a ` ```suggestion ` block. Mixes real bugs with style opinions, so judge each one. |
 | Gemini Code Assist | `gemini-code-assist[bot]` | an image badge: `![high](https://www.gstatic.com/codereviewagent/high-priority.svg)` | Read the alt text (`critical`, `high`, `medium`, `low`) for severity. Often ends in a ` ```suggestion ` block. |
 | Sourcery | `sourcery-ai[bot]` | none | Posts a "Reviewer Guide" summary comment plus inline notes. |
@@ -52,8 +54,12 @@ Other review bots exist, and new ones appear. Do not treat this table as the
 membership test. Any `Bot` author whose comment names a file and describes a
 problem is a reviewer, whether or not it is listed here.
 
-Ignore bots that do not review code: dependency bumpers, coverage reporters,
-and CI status posters. They have no findings for you to fix.
+Lint and analysis bots count too. A `github-actions[bot]` comment that names a
+file and a rule it breaks is a finding, even though no review app posted it.
+
+Ignore only bots that have nothing to fix: dependency bumpers, coverage
+reports, and comments that only report a status. Everything else a bot raises
+gets validated, and every bot thread gets a reply.
 
 ## Reading a ` ```suggestion ` block
 
@@ -62,6 +68,12 @@ replacement for the commented lines. It is a useful starting point and not a
 verdict. Check it against the current file before you use it, because the
 suggested text can be stale, can drop lines the reviewer did not see, and can
 contradict the prose above it.
+
+## Never mention a bot in a reply
+
+Several bots act on a mention. `@codex` starts a Codex task, `@coderabbitai`
+starts a CodeRabbit chat, and `@claude` starts Claude. Write replies without an
+`@` before any bot name. A reply in the bot's own thread reaches it without one.
 
 ## Human comments need different handling
 

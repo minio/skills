@@ -191,7 +191,7 @@ have as threads.
 
 ## Detect a review in progress
 
-Run both checks. They see different states, and neither alone is enough.
+Run all three checks. They see different states, and no one of them is enough.
 
 ### Check A — pending check runs
 
@@ -209,7 +209,7 @@ checks=$(gh pr checks "$pr_number" --json name,bucket,state 2>/dev/null || true)
 pending=0
 if [ -n "$checks" ]; then
   pending=$(jq '[.[]
-    | select(.name | ascii_downcase | test("coderabbit|copilot|gemini|sourcery|qodo|greptile|bugbot|ellipsis|review"))
+    | select(.name | ascii_downcase | test("claude|codex|coderabbit|copilot|gemini|sourcery|qodo|greptile|bugbot|ellipsis|review"))
     | select(.bucket == "pending")] | length' <<<"$checks")
 fi
 ```
@@ -248,7 +248,7 @@ in_flight=$(jq -n \
    | from_entries) as $posted
   | [$comments[][]]
   | map(select(.user.type == "Bot")
-        | select((.body // "") | test("come back again in a few minutes|is reviewing|review in progress|review queued"; "i"))
+        | select((.body // "") | test("come back again in a few minutes|is reviewing|is working|review in progress|review queued"; "i"))
         | select(.updated_at > ($posted[.user.login] // "")))
   | length')
 ```
@@ -258,11 +258,40 @@ array endpoints into one array today, so this reads the same as indexing the
 first document, and it keeps reading correctly if a `gh` version ever emits one
 array per page. Indexing `[0]` would silently see only the first page.
 
+Claude edits one comment in place: it reads "Claude Code is working…" while
+the review runs and "Claude finished …" once it is done. Its review bodies are
+often empty, so `$posted` has no entry for it, and any comment still saying
+"working" counts as in flight.
+
 This also catches the case that matters most: a reviewer that already reviewed an
 earlier commit and is now re-reviewing the one you just pushed. Its old findings
 are still on the pull request, and they describe the wrong code.
 
-If `pending` is above zero, or `in_flight` is above zero, stop and tell the user
+### Check C — Codex review state
+
+Codex keeps one summary comment and edits it as reviews start and finish. The
+comment carries a machine-readable marker:
+
+```
+<!-- codex-review-state:v1 {"code_review":{"commit_sha":"…","status":"running"},"security_review":{…}} -->
+```
+
+Read the status from the marker, not from the visible text:
+
+```bash
+owner=$(gh repo view --json owner --jq '.owner.login')
+repo=$(gh repo view --json name --jq '.name')
+pr_number=$(gh pr list --head "$(git branch --show-current)" --state open --json number --jq '.[0].number')
+work="${TMPDIR:-/tmp}/pr-autofix/$owner-$repo-$pr_number"
+
+codex_running=$(jq '[.[]
+  | select(.user.type == "Bot")
+  | (.body // "") | capture("codex-review-state:v1 (?<s>\\{.*\\}) -->")?
+  | .s | fromjson? | [.code_review.status, .security_review.status][]
+  | select(. == "running")] | length' "$work/comments.json")
+```
+
+If `pending`, `in_flight`, or `codex_running` is above zero, stop and tell the user
 to try again in a few minutes. Do not read findings while a review is running:
 the set changes underneath you, so two queries seconds apart disagree, and the
 user ends up approving fixes for code that has moved on.

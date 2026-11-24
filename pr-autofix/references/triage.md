@@ -12,8 +12,9 @@ Drop an entry only for these reasons:
 - The thread is resolved **and** its last comment is not a fresh request.
 - The thread's root comment has `isMinimized == true`. CodeRabbit minimizes a
   comment it has superseded, so acting on one revives a withdrawn finding.
-- The author is a bot that does not review code, such as a dependency bumper or
-  a coverage reporter.
+- The author is a bot with nothing to fix, such as a dependency bumper, a
+  coverage report, or a status post. A lint bot that names a file and a rule
+  is a reviewer; keep its findings.
 - The comment is a status placeholder, a walkthrough, or a summary that names no
   specific problem. That includes a review bot reporting that it could not
   review, for example for lack of quota.
@@ -46,8 +47,14 @@ highest priority in the run.
 
 Two reviewers frequently report the same problem. Merge entries that share a
 path and an overlapping line range and make the same claim. Keep the one with
-the most specific reasoning, list both reviewers on it, and count it once. This
+the most specific reasoning, list both reviewers on it, and count it once. Keep
+every source thread id on the merged entry: each of those threads gets its own
+reply and is resolved on its own. This
 matters most for Copilot and CodeRabbit, which overlap on obvious bugs.
+
+Claude often posts each finding twice: once as an inline thread and once in
+its "Claude finished …" summary comment. Keep the thread, because only a thread
+can take a reply and be resolved, and drop the summary copy.
 
 For CodeRabbit's own repeats across review rounds, use the marker key in
 `coderabbit.md`.
@@ -56,14 +63,15 @@ For CodeRabbit's own repeats across review rounds, use the marker key in
 
 Reviewers use different vocabularies. Map them onto one scale:
 
-| Scale | CodeRabbit | Gemini | Others |
-| --- | --- | --- | --- |
-| CRITICAL | 🔴 Critical | `critical` | wording such as "security", "data loss", "crash" |
-| HIGH | 🟠 Major | `high` | a concrete bug with a described failure |
-| MEDIUM | 🟡 Minor | `medium` | correctness that is unlikely to trigger |
-| LOW | 🧹 Nitpick, 🔵 Trivial, 🔇 Additional | `low` | style, naming, preference |
+| Scale | CodeRabbit | Gemini | Codex | Claude | Others |
+| --- | --- | --- | --- | --- | --- |
+| CRITICAL | 🔴 Critical | `critical` | `P0` | `CRITICAL` | wording such as "security", "data loss", "crash" |
+| HIGH | 🟠 Major | `high` | `P1` | `HIGH` | a concrete bug with a described failure |
+| MEDIUM | 🟡 Minor | `medium` | `P2` | `MEDIUM` | correctness that is unlikely to trigger |
+| LOW | 🧹 Nitpick, 🔵 Trivial, 🔇 Additional | `low` | `P3` | `LOW` | style, naming, preference |
 
-Copilot supplies no severity. Read the comment and assign one from what it
+Copilot supplies no severity, and Claude supplies one only when the
+repository's prompt asks for it. Read the comment and assign one from what it
 actually claims, not from its confident tone.
 
 Anything a human raises starts one level higher than the same claim from a bot.
@@ -146,17 +154,32 @@ Before a finding reaches the user's screen or a pull request comment, strip:
 Keep the claim, the location, and the reasoning. That is all the user needs to
 approve a fix.
 
-## Replying to people
+## Replying and resolving
 
-A summary comment does not reach a thread, so a question asked in a thread stays
-unanswered unless you reply there.
+Every bot thread you worked gets a reply, and every human thread that asked a
+question gets an answer. A summary comment does not reach a thread, so a
+finding answered only there still looks open to the reviewer.
 
-- Reply in the thread that asked, one reply per thread.
-- Answer what was asked. If you changed code, name the commit.
-- Draft the reply, show it to the user, and post only after they approve.
-- Do not reply to bot threads. A bot does not read your answer, and the summary
-  comment already records what you did.
-- Do not resolve any thread on the user's behalf, and never resolve a human one.
+- Reply in the thread that raised the finding, one reply per thread.
+- Fixed: say what changed and name the commit. Then resolve the thread.
+- Invalid: say why, and name the line that shows it. Then resolve the thread.
+- Deferred, or left for the author: say so, and leave the thread open.
+- Bot threads: post without asking, straight after the push in Step 11.
+- Human threads: draft the reply, show it to the user, and post only after
+  approval. Never resolve a human thread.
+- Skip a thread that is already resolved, or whose root comment is minimized.
+- Never `@`-mention a bot. See `reviewers.md`.
+
+Keep replies short and in your own words:
+
+```
+Fixed in abc1234: the audit insert and the delete now run in one transaction.
+```
+
+```
+Not changed: `limit` cannot be negative here, because `parseLimit` at
+`api/params.go:41` rejects it before this call.
+```
 
 Reply to a thread by its GraphQL id. `$thread_id` is the `id` field of the
 thread in `threads.json`, and the reply text goes in a file rather than in the
@@ -175,3 +198,20 @@ gh api graphql -F thread="$thread_id" -F body=@"$work/reply.md" \
     }
   }'
 ```
+
+Then resolve it, only once the reply has posted and only for a Fixed or Invalid
+bot thread:
+
+```bash
+gh api graphql -F thread="$thread_id" \
+  -f query='mutation($thread:ID!) {
+    resolveReviewThread(input:{threadId:$thread}) {
+      thread { isResolved }
+    }
+  }' --jq '.data.resolveReviewThread.thread.isResolved'
+```
+
+It prints `true` on success. `gh` exits zero on a GraphQL error, so anything
+else means the thread is still open: report it to the user rather than moving
+on. Resolving needs write access to the repository or authorship of the pull
+request.
