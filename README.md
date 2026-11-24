@@ -21,7 +21,7 @@ them with one command, no MinIO source checkout required.
 | [`aimem`](./aimem)   | `npx skills add minio/skills/aimem` | Work inside an [AIStor Memory](https://docs.min.io/aimem) workspace — locate the mount, durability semantics, agent memory, object metadata and annotations, and server-side search with `aimem search`. |
 | [`docs`](./docs)     | `npx skills add minio/skills/docs` | Write documentation to the ISO 24495-1 Plain Language standard — the four governing principles (relevant, findable, understandable, usable), the plan/write/evaluate/revise process, and a self-check before you save. |
 | [`mc`](./mc)         | `npx skills add minio/skills/mc`   | Drive `mc`, the AIStor command-line client — connect via an alias, list/copy/remove objects and buckets, and run bucket config, replication, lifecycle, cluster admin, and Tables operations non-interactively with JSON-lines output. |
-| [`pr-autofix`](./pr-autofix) | `npx skills add minio/skills/pr-autofix` | Act on every review comment on a pull request — CodeRabbit, Copilot, Gemini, other review bots, and people. Recovers the CodeRabbit findings that never reach the diff, removes duplicates, then applies fixes one at a time with your approval. |
+| [`pr-autofix`](./pr-autofix) | `npx skills add minio/skills/pr-autofix` | Act on every review comment on a pull request — Claude, Codex, CodeRabbit, Copilot, Gemini, other review and lint bots, and people. Recovers the CodeRabbit findings that never reach the diff, removes duplicates, applies fixes one at a time with your approval, then replies to every bot comment and resolves each fixed thread. |
 | [`pr-review`](./pr-review) | `npx skills add minio/skills/pr-review` | Review a pull request's code in one pass — verify each finding by tracing the code or running the narrowest test, and return a short, ranked list of real problems with file and line. Posts only with your approval. |
 
 ## Installing
@@ -56,6 +56,35 @@ Install from here when your agent's reasoning runs **outside** the sandbox — f
 example the OpenAI Agents SDK or other managed-agent harnesses, where the model
 lives in a control plane and an in-sandbox install is invisible to it. Add the
 skill host-side, alongside your own skills, before the run starts.
+
+## Updating
+
+Skills change as review bots and tools change. To get the latest version of a
+skill you installed with the `skills` CLI:
+
+```bash
+# see which installed skills have updates
+npx skills check
+
+# update one skill, or every installed skill
+npx skills update pr-autofix
+npx skills update
+```
+
+`npx skills update` asks whether to update global or project skills. Add `-g`
+for global skills only, `-p` for project skills only, or `-y` to skip the
+question.
+
+If you copied a skill folder by hand, copy it again from a fresh clone:
+
+```bash
+git clone https://github.com/minio/skills.git   # or: git -C skills pull
+rm -rf ~/.claude/skills/pr-autofix
+cp -r skills/pr-autofix ~/.claude/skills/pr-autofix
+```
+
+If your agent is already running, start a new session so it loads the new
+version.
 
 ## Contributing a skill
 
