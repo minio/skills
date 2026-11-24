@@ -241,6 +241,9 @@ proves the finding wrong.
 
 ### Step 11: Validate and push
 
+Skip this step when no finding was Fixed: there is nothing to publish, and
+`git push` can fail on a branch with nothing new. Go straight to Step 12.
+
 Run the repository's build, lint, and test commands from Step 1. Report what
 they printed, including failures. Do not push a failing build.
 
@@ -262,7 +265,8 @@ false record.
 
 ### Step 12: Reply to every comment and resolve
 
-Do this straight after the push, in one pass, using the commands in
+Do this straight after the push, or straight after Step 10 when nothing was
+fixed, in one pass, using the commands in
 "Replying and resolving" in `references/triage.md`.
 
 **Bot threads.** Reply to every open bot thread collected in Step 5, without
