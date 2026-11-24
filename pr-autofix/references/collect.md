@@ -288,12 +288,15 @@ repo=$(gh repo view --json name --jq '.name')
 pr_number=$(gh pr list --head "$(git branch --show-current)" --state open --json number --jq '.[0].number')
 work="${TMPDIR:-/tmp}/pr-autofix/$owner-$repo-$pr_number"
 
-codex_running=$(jq '[.[]
+codex_running=$(jq -s '[.[][]
   | select(.user.type == "Bot")
   | (.body // "") | capture("codex-review-state:v1 (?<s>\\{.*\\}) -->")?
   | .s | fromjson? | [.code_review.status, .security_review.status][]
   | select(. == "running")] | length' "$work/comments.json")
 ```
+
+`-s` reads every page in the file into one array, so the block prints one count
+even if `gh` writes one array per page.
 
 If `pending`, `in_flight`, or `codex_running` is above zero, stop and tell the user
 to try again in a few minutes. Do not read findings while a review is running:
